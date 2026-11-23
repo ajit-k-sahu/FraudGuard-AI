@@ -1,0 +1,100 @@
+{
+  "selected_model": "Random Forest",
+  "model_version": "1.0.0",
+  "dataset": "PaySim-style Synthetic Benchmark (15,000 transactions)",
+  "all_models_evaluation": {
+    "Logistic Regression": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 0.9999999999999998,
+      "confusion_matrix": [
+        [
+          2895,
+          0
+        ],
+        [
+          0,
+          105
+        ]
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "confusion_matrix": [
+        [
+          2895,
+          0
+        ],
+        [
+          0,
+          105
+        ]
+      ]
+    },
+    "Gradient Boosting": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "confusion_matrix": [
+        [
+          2895,
+          0
+        ],
+        [
+          0,
+          105
+        ]
+      ]
+    }
+  },
+  "selected_metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": [
+      [
+        2895,
+        0
+      ],
+      [
+        0,
+        105
+      ]
+    ]
+  },
+  "thresholds": {
+    "low_risk_ceiling": 0.3,
+    "high_risk_floor": 0.7
+  },
+  "top_features": {
+    "balance_orig_drain_ratio": 0.16317574390030712,
+    "device_New / Unrecognized Device": 0.13447067683646438,
+    "amount_to_prev_ratio": 0.13188106598878585,
+    "amount": 0.11750282520216584,
+    "frequency_24h": 0.0857253017712141,
+    "log_amount": 0.07814010364996833,
+    "is_high_frequency": 0.07326105010074321,
+    "location_Domestic": 0.05724855096987536,
+    "old_balance_orig": 0.054520570465674184,
+    "account_age_days": 0.023487196332514816,
+    "new_balance_orig": 0.02310767750344735,
+    "location_Cross-Border (Unusual)": 0.01738419786674839,
+    "device_Mobile App (Recognized)": 0.01623311531748257,
+    "previous_amount": 0.00811380760891401,
+    "location_High-Risk Domestic": 0.003557512223282456
+  }
+}

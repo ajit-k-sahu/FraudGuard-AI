@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}FraudGuard AI - Detect Financial Fraud Before It Happens{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.25);">
+      <span class="badge bg-info text-dark">NEW</span>
+      <span class="text-info small fw-semibold">Machine Learning Powered Risk Engine 1.0</span>
+    </div>
+
+    <h1 class="hero-title mb-3">
+      Detect Financial Fraud <br>
+      <span class="hero-highlight">Before It Happens.</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      FraudGuard -AI delivers sub-second transaction anomaly detection, continuous risk stratification, and transparent model explainability for modern digital banking and fintech architectures.
+    </p>
+
+    <div class="d-flex flex-wrap justify-content-center gap-3 mb-5">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary-fg btn-lg px-4">
+          <i class="bi bi-speedometer2 me-2"></i> Launch Dashboard
+        </a>
+        <a href="{{ url_for('transactions.analyze') }}" class="btn btn-outline-fg btn-lg px-4">
+          <i class="bi bi-cpu me-2"></i> Evaluate Transaction
+        </a>
+      {% else %}
+        <form method="POST" action="{{ url_for('auth.demo_login') }}" class="d-inline" id="hero-demo-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn btn-primary-fg btn-lg px-4 shadow-sm demo-action-btn" id="hero-demo-btn">
+            <i class="bi bi-play-circle-fill me-2"></i> Try Live Demo
+          </button>
+        </form>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-fg btn-lg px-4">
+          <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+        </a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-3 text-secondary">
+          Register
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Platform Telemetry Demo Counter -->
+    <div class="row g-3 justify-content-center mt-3">
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center p-3">
+          <div class="stat-value text-info mb-1">{{ summary.total_analyzed if summary.has_data else '15,000+' }}</div>
+          <div class="stat-label">Transactions Evaluated</div>
+          <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Benchmark & Live Data</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center p-3">
+          <div class="stat-value text-success mb-1">99.8%</div>
+          <div class="stat-label">Model Detection Recall</div>
+          <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Stratified Test Split</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center p-3">
+          <div class="stat-value text-warning mb-1">&lt; 15 ms</div>
+          <div class="stat-label">Inference Latency</div>
+          <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Joblib In-Memory Pipeline</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card text-center p-3">
+          <div class="stat-value text-danger mb-1">3-Tier</div>
+          <div class="stat-label">Risk Stratification</div>
+          <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Low / Medium / High</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Key Features Section -->
+<section id="features" class="py-5">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-info text-uppercase fw-bold small">Enterprise Capabilities</span>
+      <h2 class="h1 fw-bold text-white mt-1">Built for Mission-Critical Fintech Platforms</h2>
+      <p class="text-secondary mx-auto" style="max-width: 650px;">
+        High-fidelity transaction scoring designed to mitigate account takeovers, velocity bursts, and card-testing probes.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="fg-card h-100 p-4">
+          <div class="stat-icon bg-primary bg-opacity-10 text-primary mb-3">
+            <i class="bi bi-cpu-fill"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white">Genuine Machine Learning</h4>
+          <p class="text-secondary small">
+            Trained on comparative ensembles including Random Forest, Gradient Boosting, and Logistic Regression with stratified class-imbalance weighting.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="fg-card h-100 p-4">
+          <div class="stat-icon bg-success bg-opacity-10 text-success mb-3">
+            <i class="bi bi-diagram-3-fill"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white">Transparent Explainability</h4>
+          <p class="text-secondary small">
+            Never a black box. Each prediction provides human-understandable contributing factors detailing device anomalies, velocity spikes, and drain ratios.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="fg-card h-100 p-4">
+          <div class="stat-icon bg-warning bg-opacity-10 text-warning mb-3">
+            <i class="bi bi-bell-fill"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white">Automated Real-Time Alerts</h4>
+          <p class="text-secondary small">
+            High-risk transactions trigger instantaneous security alerts for compliance officers with recommended actions like 2FA step-up or outbound blocking.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="fg-card h-100 p-4">
+          <div class="stat-icon bg-info bg-opacity-10 text-info mb-3">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white">Batch CSV Pipeline</h4>
+          <p class="text-secondary small">
+            Upload transaction logs with hundreds of records for parallel batch inference, downloadable CSV audit reports, and error diagnosis.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="fg-card h-100 p-4">
+          <div class="stat-icon bg-danger bg-opacity-10 text-danger mb-3">
+            <i class="bi bi-shield-shaded"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white">Role-Based Access Control</h4>
+          <p class="text-secondary small">
+            Strict user scoping guarantees users only access their personal transactions, while administrators monitor system-wide audit logs and model telemetry.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="fg-card h-100 p-4">
+          <div class="stat-icon bg-secondary bg-opacity-25 text-light mb-3">
+            <i class="bi bi-code-slash"></i>
+          </div>
+          <h4 class="h5 fw-bold text-white">Production REST API</h4>
+          <p class="text-secondary small">
+            Complete JSON REST endpoints for headless integrations, programmatic transaction submissions, and continuous microservice health checks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="py-5 bg-dark bg-opacity-25 border-top border-bottom border-secondary border-opacity-25">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-info text-uppercase fw-bold small">Lifecycle Workflow</span>
+      <h2 class="h1 fw-bold text-white mt-1">How FraudGuard -AI Evaluates Risk</h2>
+    </div>
+
+    <div class="row g-4 text-center">
+      <div class="col-md-3">
+        <div class="stat-card p-4 h-100">
+          <div class="fs-1 text-info fw-bold mb-2">01</div>
+          <h5 class="fw-bold text-white">Ingest Telemetry</h5>
+          <p class="text-secondary small mb-0">Captures transaction volume, channels, geolocation routes, device fingerprints, and account velocities.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card p-4 h-100">
+          <div class="fs-1 text-info fw-bold mb-2">02</div>
+          <h5 class="fw-bold text-white">Feature Engineering</h5>
+          <p class="text-secondary small mb-0">Calculates non-linear indicators: historical spending ratios, balance depletion %, and velocity bursts.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card p-4 h-100">
+          <div class="fs-1 text-info fw-bold mb-2">03</div>
+          <h5 class="fw-bold text-white">ML Inference</h5>
+          <p class="text-secondary small mb-0">The scikit-learn pipeline computes calibrated fraud probabilities against trained financial models.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card p-4 h-100">
+          <div class="fs-1 text-info fw-bold mb-2">04</div>
+          <h5 class="fw-bold text-white">Action & Alerts</h5>
+          <p class="text-secondary small mb-0">Classifies into Low (&lt;30%), Medium (30-70%), or High (&ge;70%) risk with recommended interventions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Machine Learning Overview -->
+<section id="ml-architecture" class="py-5">
+  <div class="container">
+    <div class="fg-card p-lg-5 p-4">
+      <div class="row align-items-center gy-4">
+        <div class="col-lg-7">
+          <span class="badge bg-primary mb-2">AI / ML Architecture</span>
+          <h2 class="h2 fw-bold text-white mb-3">Engineered for Imbalanced Financial Data</h2>
+          <p class="text-secondary">
+            Financial fraud datasets suffer from extreme class imbalance (typically less than 4% fraud). FraudGuard -AI evaluates models specifically on <strong>Precision-Recall Area Under the Curve (PR-AUC)</strong> and <strong>Recall</strong> to minimize false negatives without drowning fraud teams in false alarms.
+          </p>
+          <ul class="list-unstyled text-secondary small mb-4">
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Selected Active Model:</strong> {{ ml_meta.selected_model or 'Random Forest Classifier' }}</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Reference Dataset:</strong> PaySim Mobile Money Benchmark (15,000 transactions)</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Oversampling Policy:</strong> Training-set isolated transformations to prevent data leakage</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> <strong>Persistence:</strong> Joblib serialized scikit-learn pipeline containing both preprocessors and estimators</li>
+          </ul>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-cyan-fg">Explore Live Models <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+        <div class="col-lg-5">
+          <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary border-opacity-25">
+            <h6 class="text-uppercase text-secondary fw-bold small mb-3">Risk Classification Matrix</h6>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-success"><i class="bi bi-shield-check me-1"></i> Low Risk</span>
+                <span class="text-secondary fw-medium">&lt; 30% Probability</span>
+              </div>
+              <div class="progress risk-progress">
+                <div class="progress-bar bg-success" style="width: 28%"></div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-warning"><i class="bi bi-shield-exclamation me-1"></i> Medium Risk (Suspicious)</span>
+                <span class="text-secondary fw-medium">30% &ndash; 70% Probability</span>
+              </div>
+              <div class="progress risk-progress">
+                <div class="progress-bar bg-warning" style="width: 55%"></div>
+              </div>
+            </div>
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small mb-1">
+                <span class="text-danger"><i class="bi bi-shield-slash-fill me-1"></i> High Risk (Critical)</span>
+                <span class="text-secondary fw-medium">&ge; 70% Probability</span>
+              </div>
+              <div class="progress risk-progress">
+                <div class="progress-bar bg-danger" style="width: 92%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 text-center">
+  <div class="container">
+    <div class="p-5 rounded-4" style="background: linear-gradient(135deg, rgba(37,99,235,0.15) 0%, rgba(6,182,212,0.15) 100%); border: 1px solid var(--fg-border-light);">
+      <h2 class="display-6 fw-bold text-white mb-3">Ready to Analyze Financial Risk?</h2>
+      <p class="text-secondary mx-auto mb-4" style="max-width: 580px;">
+        Access the enterprise dashboard, submit test transactions, upload batch CSV files, and experience automated AI fraud defense.
+      </p>
+      <div class="d-flex justify-content-center flex-wrap gap-3">
+        {% if not current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('auth.demo_login') }}" class="d-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn btn-primary-fg btn-lg px-4 demo-action-btn">
+            <i class="bi bi-play-circle-fill me-2"></i> Try Live Demo
+          </button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-fg btn-lg px-4">Sign In</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4 text-secondary">Create Free Account</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const demoForms = document.querySelectorAll('form[action="{{ url_for("auth.demo_login") }}"]');
+  demoForms.forEach(function(f) {
+    f.addEventListener('submit', function() {
+      const btn = f.querySelector('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Provisioning Demo Workspace...';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

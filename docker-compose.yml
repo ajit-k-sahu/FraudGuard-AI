@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: fraudguard_web
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=fraudguard-production-secret-change-in-real-prod-2026
+      - DATABASE_URL=postgresql://fraudguard_user:fraudguard_pass_2026@db:5432/fraudguard_db
+      - REDIS_URL=redis://redis:6379/0
+      - RISK_THRESHOLD_LOW=0.30
+      - RISK_THRESHOLD_HIGH=0.70
+      - DEMO_MODE=True
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./ml/artifacts:/app/ml/artifacts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  db:
+    image: postgres:16-alpine
+    container_name: fraudguard_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: fraudguard_user
+      POSTGRES_PASSWORD: fraudguard_pass_2026
+      POSTGRES_DB: fraudguard_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraudguard_user -d fraudguard_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: fraudguard_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Server Error - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="fg-card p-5">
+        <div class="display-1 text-warning fw-bold mb-3">500</div>
+        <h2 class="h3 fw-bold text-white mb-2">Internal Server Error</h2>
+        <p class="text-secondary mb-4">
+          An unexpected exception occurred while processing the request. The database transaction has been safely rolled back, and the incident has been flagged for engineering review.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+          <a href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('dashboard.landing') }}" class="btn btn-primary-fg">
+            <i class="bi bi-arrow-clockwise me-1"></i> Return to Home
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction History - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-white mb-1">
+        <i class="bi bi-receipt-cutoff text-info me-2"></i> Evaluated Transaction History
+      </h1>
+      <p class="text-muted small mb-0">
+        Review audit logs, search by accounts, and filter by risk thresholds and prediction outcomes.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('transactions.export_csv') }}" class="btn btn-outline-fg">
+        <i class="bi bi-download me-1"></i> Export CSV
+      </a>
+      <a href="{{ url_for('transactions.analyze') }}" class="btn btn-primary-fg">
+        <i class="bi bi-plus-circle me-1"></i> New Analysis
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="fg-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('transactions.history') }}" class="row g-2 align-items-center">
+      <div class="col-md-3">
+        <div class="input-group">
+          <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ search_query }}" class="form-control form-control-fg" placeholder="Search Ref, Sender, Receiver...">
+        </div>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <select name="type" class="form-select form-select-fg">
+          <option value="">All Types</option>
+          {% for t in ['Transfer', 'Payment', 'Cash Withdrawal', 'Deposit', 'Purchase'] %}
+            <option value="{{ t }}" {{ 'selected' if t_type == t }}>{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <select name="risk" class="form-select form-select-fg">
+          <option value="">All Risk Tiers</option>
+          <option value="Low" {{ 'selected' if risk == 'Low' }}>Low Risk</option>
+          <option value="Medium" {{ 'selected' if risk == 'Medium' }}>Medium Risk</option>
+          <option value="High" {{ 'selected' if risk == 'High' }}>High Risk</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <select name="outcome" class="form-select form-select-fg">
+          <option value="">All Outcomes</option>
+          <option value="legit" {{ 'selected' if outcome == 'legit' }}>Legitimate</option>
+          <option value="fraud" {{ 'selected' if outcome == 'fraud' }}>Predicted Fraud</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2">
+        <select name="sort" class="form-select form-select-fg">
+          <option value="date_desc" {{ 'selected' if sort_by == 'date_desc' }}>Newest First</option>
+          <option value="date_asc" {{ 'selected' if sort_by == 'date_asc' }}>Oldest First</option>
+          <option value="amount_desc" {{ 'selected' if sort_by == 'amount_desc' }}>Highest Amount</option>
+          <option value="amount_asc" {{ 'selected' if sort_by == 'amount_asc' }}>Lowest Amount</option>
+          <option value="prob_desc" {{ 'selected' if sort_by == 'prob_desc' }}>Highest Risk Prob</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-1 d-flex gap-1">
+        <button type="submit" class="btn btn-cyan-fg w-100 py-2"><i class="bi bi-funnel"></i></button>
+        {% if search_query or t_type or risk or outcome or (sort_by != 'date_desc') %}
+          <a href="{{ url_for('transactions.history') }}" class="btn btn-outline-fg py-2" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="fg-card">
+    <div class="table-responsive">
+      <table class="table-fg mb-0">
+        <thead>
+          <tr>
+            <th>Transaction Ref</th>
+            <th>Timestamp (IST)</th>
+            <th>Amount</th>
+            <th>Type & Channel</th>
+            <th>Sender &rarr; Receiver</th>
+            <th>Fraud Prob</th>
+            <th>Risk Level</th>
+            <th>Outcome</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if transactions %}
+            {% for txn in transactions %}
+              {% set pred = txn.prediction %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('transactions.detail', txn_id=txn.id) }}" class="text-info fw-semibold text-decoration-none">
+                    {{ txn.transaction_ref }}
+                  </a>
+                  {% if txn.is_demo %}
+                    <span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">DEMO</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <small class="text-secondary fw-medium">{{ txn.created_at | format_ist }}</small>
+                </td>
+                <td class="fw-bold text-white">
+                  ${{ "{:,.2f}".format(txn.amount) }}
+                </td>
+                <td>
+                  <div class="text-white fw-semibold">{{ txn.transaction_type }}</div>
+                  <small class="text-secondary">{{ txn.channel }}</small>
+                </td>
+                <td>
+                  <small class="text-light fw-medium d-block text-truncate" style="max-width: 140px;">{{ txn.sender_account }}</small>
+                  <small class="text-secondary d-block text-truncate" style="max-width: 140px;"><i class="bi bi-arrow-right text-info me-1"></i>{{ txn.receiver_account }}</small>
+                </td>
+                <td>
+                  {% if pred %}
+                    <span class="fw-bold fs-6 {{ 'text-danger' if pred.fraud_probability >= 0.70 else ('text-warning' if pred.fraud_probability >= 0.30 else 'text-success') }}">
+                      {{ "{:.1%}".format(pred.fraud_probability) }}
+                    </span>
+                  {% else %}
+                    <span class="text-secondary">N/A</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if pred %}
+                    {% if pred.risk_level == 'High' %}
+                      <span class="badge badge-risk-high"><i class="bi bi-shield-slash-fill me-1"></i> High</span>
+                    {% elif pred.risk_level == 'Medium' %}
+                      <span class="badge badge-risk-med"><i class="bi bi-shield-exclamation me-1"></i> Med</span>
+                    {% else %}
+                      <span class="badge badge-risk-low"><i class="bi bi-shield-check me-1"></i> Low</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if pred %}
+                    {% if pred.is_fraud_predicted %}
+                      <span class="badge badge-fraud">Fraud</span>
+                    {% else %}
+                      <span class="badge badge-legit">Legit</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('transactions.detail', txn_id=txn.id) }}" class="btn btn-sm btn-outline-fg" title="View Detail">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="9" class="text-center py-5 text-muted">
+                <i class="bi bi-search fs-3 d-block mb-2 text-muted"></i>
+                No transaction records matched the selected query or filters.
+                <div class="mt-3">
+                  <a href="{{ url_for('transactions.analyze') }}" class="btn btn-sm btn-primary-fg">Analyze a Transaction</a>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if pagination.pages > 1 %}
+      <div class="p-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+          Showing page {{ pagination.page }} of {{ pagination.pages }} ({{ pagination.total }} records total)
+        </small>
+        <nav aria-label="Transaction pages">
+          <ul class="pagination pagination-sm mb-0">
+            {% if pagination.has_prev %}
+              <li class="page-item">
+                <a class="page-link bg-dark border-secondary text-light" href="{{ url_for('transactions.history', page=pagination.prev_num, q=search_query, type=t_type, risk=risk, outcome=outcome, sort=sort_by) }}">&laquo;</a>
+              </li>
+            {% endif %}
+            
+            {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+              {% if p %}
+                <li class="page-item {{ 'active' if p == pagination.page }}">
+                  <a class="page-link {{ 'bg-primary border-primary text-white' if p == pagination.page else 'bg-dark border-secondary text-light' }}" href="{{ url_for('transactions.history', page=p, q=search_query, type=t_type, risk=risk, outcome=outcome, sort=sort_by) }}">{{ p }}</a>
+                </li>
+              {% else %}
+                <li class="page-item disabled"><span class="page-link bg-dark border-secondary text-muted">&hellip;</span></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+              <li class="page-item">
+                <a class="page-link bg-dark border-secondary text-light" href="{{ url_for('transactions.history', page=pagination.next_num, q=search_query, type=t_type, risk=risk, outcome=outcome, sort=sort_by) }}">&raquo;</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

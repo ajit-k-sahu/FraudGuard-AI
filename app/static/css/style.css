@@ -1,0 +1,729 @@
+/* ==========================================================================
+   FraudGuard AI - Enterprise Fintech Design System
+   WCAG AA Compliant High-Contrast Typography & Visual Hierarchy
+   Color Palette: Deep Midnight Navy, Electric Sky Cyan, Emerald, Amber, Coral
+   ========================================================================== */
+
+:root {
+  --fg-bg-main: #0b1329;       /* Deep Midnight Navy (main background) */
+  --fg-bg-surface: #111e38;    /* Surface Navy (cards, panels, modals) */
+  --fg-bg-card: #152445;       /* Elevated Card Surface */
+  --fg-bg-card-hover: #1e335f; /* Card hover surface */
+  --fg-border: #233c70;        /* Crisp border (contrast ratio > 3.5:1 against surfaces) */
+  --fg-border-light: #3b5998;  /* Elevated border highlight */
+  
+  --fg-primary: #3b82f6;       /* Blue primary */
+  --fg-primary-hover: #2563eb;
+  --fg-accent-cyan: #38bdf8;   /* Electric Sky Cyan (WCAG AA ratio > 8.5:1) */
+  --fg-accent-indigo: #818cf8;
+  
+  /* High-Contrast Accessible Text Tokens */
+  --fg-text-bright: #ffffff;   /* Pure white headings & values */
+  --fg-text-primary: #f8fafc;  /* 98% crisp white for body & primary copy */
+  --fg-text-secondary: #cbd5e1;/* Light slate for labels & subheaders (ratio > 8.5:1) */
+  --fg-text-muted: #94a3b8;    /* Readable silver for timestamps & notes (ratio > 5.5:1) */
+
+  /* Vibrant WCAG AA Risk & Status Tiers */
+  --fg-risk-low: #34d399;      /* Emerald 400 (ratio > 8.5:1) */
+  --fg-risk-low-bg: rgba(16, 185, 129, 0.18);
+  --fg-risk-med: #fbbf24;      /* Amber 400 (ratio > 10:1) */
+  --fg-risk-med-bg: rgba(245, 158, 11, 0.18);
+  --fg-risk-high: #f87171;     /* Coral Red 400 (ratio > 6.5:1) */
+  --fg-risk-high-bg: rgba(239, 68, 68, 0.22);
+
+  --fg-radius: 12px;
+  --fg-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45);
+  --fg-glow-cyan: 0 0 20px rgba(56, 189, 248, 0.35);
+}
+
+body {
+  background-color: var(--fg-bg-main);
+  color: var(--fg-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Universal High-Contrast Accessible Utility Overrides
+   ========================================================================== */
+
+.text-muted {
+  color: #94a3b8 !important; /* Replaces dim Bootstrap default #6c757d */
+}
+
+.text-secondary {
+  color: #cbd5e1 !important;
+}
+
+.text-success {
+  color: #34d399 !important; /* Vibrant emerald */
+}
+
+.text-danger {
+  color: #f87171 !important; /* Crisp coral red */
+}
+
+.text-warning {
+  color: #fbbf24 !important; /* Bright amber */
+}
+
+.text-info {
+  color: #38bdf8 !important; /* Sky cyan */
+}
+
+.text-cyan {
+  color: #38bdf8 !important;
+}
+
+.text-light {
+  color: #f8fafc !important;
+}
+
+.text-white {
+  color: #ffffff !important;
+}
+
+.bg-dark {
+  background-color: #0b1329 !important;
+}
+
+.border-secondary {
+  border-color: #233c70 !important;
+}
+
+/* Code & Pre tags */
+code {
+  color: #38bdf8 !important;
+  background-color: rgba(11, 19, 41, 0.85) !important;
+  border: 1px solid #233c70;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Navigation Bar
+   ========================================================================== */
+.navbar-fg {
+  background: rgba(11, 19, 41, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--fg-border);
+  padding: 0.85rem 1.5rem;
+}
+
+.navbar-brand-logo {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.5px;
+  color: #ffffff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.brand-icon {
+  background: linear-gradient(135deg, #06b6d4 0%, #2563eb 100%);
+  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+}
+
+.nav-link-fg {
+  color: #cbd5e1;
+  font-weight: 500;
+  font-size: 0.92rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-link-fg:hover {
+  color: #ffffff;
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+.nav-link-fg.active {
+  color: #ffffff !important;
+  background-color: rgba(59, 130, 246, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Cards & Elevated Surfaces
+   ========================================================================== */
+.fg-card {
+  background-color: var(--fg-bg-surface);
+  border: 1px solid var(--fg-border);
+  border-radius: var(--fg-radius);
+  box-shadow: var(--fg-shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.fg-card:hover {
+  border-color: var(--fg-border-light);
+}
+
+.fg-card-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--fg-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fg-card-body {
+  padding: 1.5rem;
+}
+
+/* Sub-containers & Inner Forensic Boxes */
+.fg-detail-box, 
+.bg-dark.bg-opacity-50, 
+.bg-dark.bg-opacity-40 {
+  background-color: rgba(11, 19, 41, 0.75) !important;
+  border: 1px solid var(--fg-border) !important;
+}
+
+.fg-detail-box .text-secondary,
+.bg-dark .text-secondary {
+  color: #cbd5e1 !important;
+}
+
+.fg-detail-box .text-muted,
+.bg-dark .text-muted {
+  color: #94a3b8 !important;
+}
+
+/* ==========================================================================
+   KPI Stat Cards
+   ========================================================================== */
+.stat-card {
+  background: linear-gradient(145deg, #111e38 0%, #152445 100%);
+  border: 1px solid var(--fg-border);
+  border-radius: var(--fg-radius);
+  padding: 1.4rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--fg-border-light);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.stat-value {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--fg-text-bright);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #cbd5e1;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.stat-card small,
+.stat-card .text-muted {
+  color: #94a3b8 !important;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Risk & Status Badges
+   ========================================================================== */
+.badge-risk-low {
+  background-color: var(--fg-risk-low-bg);
+  color: var(--fg-risk-low);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+}
+
+.badge-risk-med {
+  background-color: var(--fg-risk-med-bg);
+  color: var(--fg-risk-med);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+}
+
+.badge-risk-high {
+  background-color: var(--fg-risk-high-bg);
+  color: var(--fg-risk-high);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+}
+
+.badge-legit {
+  background-color: var(--fg-risk-low-bg);
+  color: var(--fg-risk-low);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+  font-weight: 700;
+}
+
+.badge-fraud {
+  background-color: var(--fg-risk-high-bg);
+  color: var(--fg-risk-high);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  font-weight: 700;
+}
+
+.badge.bg-secondary {
+  background-color: #233c70 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #3b5998;
+  font-weight: 600;
+}
+
+.badge.bg-dark {
+  background-color: #0b1329 !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #233c70;
+}
+
+/* ==========================================================================
+   Tables & Data Records
+   ========================================================================== */
+.table-fg {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #f1f5f9;
+}
+
+.table-fg th {
+  background-color: var(--fg-bg-card);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  padding: 1rem 1.1rem;
+  border-bottom: 2px solid var(--fg-border);
+}
+
+.table-fg td {
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid #1c305c;
+  vertical-align: middle;
+  background-color: var(--fg-bg-surface);
+  font-size: 0.92rem;
+  color: #f1f5f9;
+}
+
+.table-fg tbody tr:hover td {
+  background-color: var(--fg-bg-card-hover);
+}
+
+.table-fg td small.text-muted,
+.table-fg td .text-muted {
+  color: #94a3b8 !important;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.table-fg td .text-secondary {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+}
+
+.table-fg td a.text-info {
+  color: #38bdf8 !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.table-fg td a.text-info:hover {
+  color: #7dd3fc !important;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   Forms, Inputs & Labels
+   ========================================================================== */
+.form-label-fg {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.form-control-fg, .form-select-fg {
+  background-color: #0b1329 !important;
+  border: 1px solid #253e74 !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 0.7rem 0.95rem !important;
+  font-size: 0.92rem !important;
+  font-weight: 500 !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-fg::placeholder {
+  color: #7a8fa6 !important;
+  opacity: 1 !important;
+  font-weight: 400 !important;
+}
+
+.form-control-fg:focus, .form-select-fg:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+  outline: none;
+  background-color: #0d1733 !important;
+  color: #ffffff !important;
+}
+
+.form-select-fg option {
+  background-color: #111e38;
+  color: #ffffff;
+}
+
+.form-text, .form-text.text-muted {
+  color: #94a3b8 !important;
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+}
+
+.invalid-feedback {
+  color: #f87171 !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+}
+
+/* ==========================================================================
+   Buttons & Interactivity
+   ========================================================================== */
+.btn-primary-fg {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: 1px solid #3b82f6;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-fg:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+}
+
+.btn-cyan-fg {
+  background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
+  color: #ffffff;
+  border: 1px solid #38bdf8;
+  font-weight: 600;
+  padding: 0.65rem 1.4rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-cyan-fg:hover {
+  background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
+}
+
+.btn-outline-fg {
+  background-color: rgba(17, 30, 56, 0.6);
+  color: #e2e8f0;
+  border: 1px solid #28447d;
+  border-radius: 8px;
+  padding: 0.55rem 1.15rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-fg:hover {
+  color: #ffffff;
+  border-color: #38bdf8;
+  background-color: #1c305c;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.2);
+}
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+.hero-section {
+  padding: 5rem 1rem 4rem 1rem;
+  background: radial-gradient(ellipse at 50% 20%, rgba(37, 99, 235, 0.22) 0%, rgba(11, 19, 41, 0) 70%);
+  text-align: center;
+}
+
+.hero-title {
+  font-size: 3.25rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.15;
+  background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-highlight {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  max-width: 720px;
+  margin: 1.5rem auto 2.5rem auto;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   Prediction Meter
+   ========================================================================== */
+.risk-meter-container {
+  background: var(--fg-bg-main);
+  border-radius: 10px;
+  padding: 1.4rem;
+  border: 1px solid var(--fg-border);
+}
+
+.risk-progress {
+  height: 12px;
+  background-color: #1e293b;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+.empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  color: #94a3b8;
+}
+
+.empty-state-icon {
+  font-size: 3.5rem;
+  color: var(--fg-border-light);
+  margin-bottom: 1rem;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.footer-fg {
+  margin-top: auto;
+  border-top: 1px solid var(--fg-border);
+  background-color: #0c142b;
+  padding: 2.2rem 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.footer-fg a {
+  color: #cbd5e1;
+  transition: color 0.2s;
+}
+
+.footer-fg a:hover {
+  color: #38bdf8;
+}
+
+/* ==========================================================================
+   Modals
+   ========================================================================== */
+.modal-content-fg {
+  background-color: var(--fg-bg-surface);
+  border: 1px solid var(--fg-border-light);
+  color: var(--fg-text-primary);
+  border-radius: var(--fg-radius);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.modal-header-fg {
+  border-bottom: 1px solid var(--fg-border);
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-footer-fg {
+  border-top: 1px solid var(--fg-border);
+  padding: 1.25rem 1.5rem;
+}
+
+/* ==========================================================================
+   Global Notification & Alert System (WCAG AA Compliant)
+   High-Contrast Dark Fintech SaaS Alerts
+   ========================================================================== */
+
+.alert,
+.alert-fg {
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  border-width: 1px;
+  border-style: solid;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.alert-fg {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  border-left-width: 4px;
+}
+
+.alert-fg.alert-dismissible {
+  padding-right: 3.5rem;
+}
+
+.alert-fg-icon {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  margin-top: 0.1rem;
+}
+
+.alert-fg-message {
+  flex-grow: 1;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.alert-fg.alert-dismissible .btn-close,
+.alert-dismissible .btn-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.4rem;
+  opacity: 0.8;
+  filter: invert(1) grayscale(100%) brightness(200%);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.alert-fg.alert-dismissible .btn-close:hover,
+.alert-dismissible .btn-close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 1. SUCCESS & INFORMATION NOTIFICATIONS (Unified Electric Blue Theme) */
+/* Dark cobalt navy background + electric cyan border & icon + pure white text */
+.alert-success,
+.alert-fg-success,
+.alert-info,
+.alert-fg-info {
+  background-color: #0c2b4c !important;
+  border-color: #38bdf8 !important;
+  color: #f0f9ff !important;
+  box-shadow: 0 4px 18px rgba(56, 189, 248, 0.4);
+}
+
+.alert-success .alert-fg-icon,
+.alert-fg-success .alert-fg-icon,
+.alert-success i,
+.alert-info .alert-fg-icon,
+.alert-fg-info .alert-fg-icon,
+.alert-info i {
+  color: #38bdf8 !important;
+}
+
+.alert-success .alert-fg-message,
+.alert-fg-success .alert-fg-message,
+.alert-success div,
+.alert-info .alert-fg-message,
+.alert-fg-info .alert-fg-message,
+.alert-info div {
+  color: #ffffff !important;
+}
+
+/* 2. DANGER / ERROR NOTIFICATIONS */
+/* Dark red background + bright white or pale red text */
+.alert-danger,
+.alert-fg-danger,
+.alert-fg-error {
+  background-color: #3b0f14 !important;
+  border-color: #ef4444 !important;
+  color: #fff1f2 !important;
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4);
+}
+
+.alert-danger .alert-fg-icon,
+.alert-fg-danger .alert-fg-icon,
+.alert-danger i {
+  color: #f87171 !important;
+}
+
+.alert-danger .alert-fg-message,
+.alert-fg-danger .alert-fg-message,
+.alert-danger div {
+  color: #ffffff !important;
+}
+
+/* 3. WARNING NOTIFICATIONS */
+/* Dark amber background + bright readable yellow-white text */
+.alert-warning,
+.alert-fg-warning {
+  background-color: #3b2308 !important;
+  border-color: #f59e0b !important;
+  color: #fefce8 !important;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
+}
+
+.alert-warning .alert-fg-icon,
+.alert-fg-warning .alert-fg-icon,
+.alert-warning i {
+  color: #fbbf24 !important;
+}
+
+.alert-warning .alert-fg-message,
+.alert-fg-warning .alert-fg-message,
+.alert-warning div,
+.alert-warning ul,
+.alert-warning li {
+  color: #fefce8 !important;
+}

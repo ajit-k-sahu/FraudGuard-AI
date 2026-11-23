@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Transaction Analysis - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-white mb-1">
+        <i class="bi bi-cloud-arrow-up text-info me-2"></i> Batch Transaction Evaluation
+      </h1>
+      <p class="text-muted small mb-0">
+        Upload multi-record CSV files for parallel inference, aggregate risk scoring, and downloadable audit exports.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('transactions.download_sample_csv') }}" class="btn btn-outline-fg">
+        <i class="bi bi-file-earmark-arrow-down me-1"></i> Download Sample CSV
+      </a>
+      <a href="{{ url_for('transactions.history') }}" class="btn btn-outline-fg">
+        <i class="bi bi-clock-history me-1"></i> Transaction History
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-4">
+    <!-- Upload Dropzone / Form -->
+    <div class="col-lg-6">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">Upload Transaction File</h5>
+          <span class="badge bg-dark border border-secondary text-info">Max 500 Rows</span>
+        </div>
+        <div class="fg-card-body">
+          <form method="POST" action="{{ url_for('transactions.batch') }}" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-4">
+              <label class="form-label form-label-fg">{{ form.csv_file.label.text }}</label>
+              {{ form.csv_file(class="form-control form-control-fg" + (" is-invalid" if form.csv_file.errors else "")) }}
+              {% for err in form.csv_file.errors %}
+                <div class="invalid-feedback">{{ err }}</div>
+              {% endfor %}
+              <div class="form-text text-muted small mt-2">
+                Supported formats: Standard Comma-Separated Values (<code>.csv</code>). Maximum upload payload size: 16 MB.
+              </div>
+            </div>
+
+            <div class="p-3 bg-dark bg-opacity-40 rounded border border-secondary border-opacity-25 mb-4 small text-muted">
+              <span class="text-white fw-semibold d-block mb-1">Expected CSV Column Header Structure:</span>
+              <code>amount, transaction_type, sender_account, receiver_account, channel, location, device, frequency_24h, account_age_days, previous_amount</code>
+            </div>
+
+            <button type="submit" class="btn btn-primary-fg w-100 py-2">
+              <i class="bi bi-cpu me-2"></i> Upload and Analyze Batch
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch Summary Telemetry Card -->
+    <div class="col-lg-6">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">Batch Processing Summary</h5>
+          {% if summary.total > 0 %}
+            <span class="badge bg-success">Execution Complete</span>
+          {% else %}
+            <span class="badge bg-secondary">Idle</span>
+          {% endif %}
+        </div>
+        <div class="fg-card-body">
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3 text-center p-3 rounded bg-dark bg-opacity-40">
+              <span class="stat-label">Total Rows</span>
+              <div class="h3 fw-bold text-white mb-0">{{ summary.total }}</div>
+            </div>
+            <div class="col-6 col-md-3 text-center p-3 rounded bg-dark bg-opacity-40">
+              <span class="stat-label">Evaluated</span>
+              <div class="h3 fw-bold text-success mb-0">{{ summary.processed }}</div>
+            </div>
+            <div class="col-6 col-md-3 text-center p-3 rounded bg-dark bg-opacity-40">
+              <span class="stat-label">Flagged</span>
+              <div class="h3 fw-bold text-danger mb-0">{{ summary.fraud_flagged }}</div>
+            </div>
+            <div class="col-6 col-md-3 text-center p-3 rounded bg-dark bg-opacity-40">
+              <span class="stat-label">Failed</span>
+              <div class="h3 fw-bold text-warning mb-0">{{ summary.failed }}</div>
+            </div>
+          </div>
+
+          {% if errors %}
+            <div class="alert alert-fg alert-fg-warning p-3 small mb-0">
+              <span class="fw-bold d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Row Parsing Errors Detected:</span>
+              <ul class="mb-0 ps-3">
+                {% for err in errors[:5] %}
+                  <li>{{ err }}</li>
+                {% endfor %}
+                {% if errors | length > 5 %}
+                  <li>...and {{ (errors | length) - 5 }} additional row errors.</li>
+                {% endif %}
+              </ul>
+            </div>
+          {% else %}
+            <div class="text-muted small">
+              Upload a valid CSV file to view real-time batch statistics. All valid records are securely persisted into your transaction audit database.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Table Section -->
+  {% if batch_results %}
+    <div class="fg-card">
+      <div class="fg-card-header">
+        <h5 class="h6 fw-bold text-white mb-0">
+          <i class="bi bi-table text-info me-2"></i> Batch Evaluation Records ({{ batch_results | length }})
+        </h5>
+        <a href="{{ url_for('transactions.export_csv') }}" class="btn btn-sm btn-outline-fg">
+          <i class="bi bi-download me-1"></i> Export Results CSV
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table-fg mb-0">
+          <thead>
+            <tr>
+              <th>Row #</th>
+              <th>Transaction Ref</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Risk Tier</th>
+              <th>Probability</th>
+              <th>Model Outcome</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in batch_results %}
+              <tr>
+                <td>{{ item.row }}</td>
+                <td><span class="text-info font-monospace">{{ item.ref }}</span></td>
+                <td class="fw-bold">${{ "{:,.2f}".format(item.amount) }}</td>
+                <td>{{ item.type }}</td>
+                <td>
+                  {% if item.risk_level == 'High' %}
+                    <span class="badge badge-risk-high">High</span>
+                  {% elif item.risk_level == 'Medium' %}
+                    <span class="badge badge-risk-med">Medium</span>
+                  {% else %}
+                    <span class="badge badge-risk-low">Low</span>
+                  {% endif %}
+                </td>
+                <td class="fw-semibold">{{ item.probability }}</td>
+                <td>
+                  {% if item.is_fraud %}
+                    <span class="badge badge-fraud">Fraud</span>
+                  {% else %}
+                    <span class="badge badge-legit">Legit</span>
+                  {% endif %}
+                </td>
+                <td><span class="badge bg-success bg-opacity-25 text-success">{{ item.status }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

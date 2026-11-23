@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="fg-card p-4 p-md-5">
+        <div class="text-center mb-4">
+          <span class="brand-icon mb-3" style="width: 48px; height: 48px; font-size: 1.4rem;">
+            <i class="bi bi-shield-lock-fill"></i>
+          </span>
+          <h2 class="h3 fw-bold text-white">Sign In to FraudGuard <span class="text-info">-AI</span></h2>
+          <p class="text-secondary small">Enter your credentials to access the risk telemetry platform.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            <label class="form-label form-label-fg">{{ form.email.label.text }}</label>
+            {{ form.email(class="form-control form-control-fg" + (" is-invalid" if form.email.errors else ""), placeholder="name@company.com", autocomplete="email") }}
+            {% for error in form.email.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label form-label-fg mb-0">{{ form.password.label.text }}</label>
+            </div>
+            {{ form.password(class="form-control form-control-fg" + (" is-invalid" if form.password.errors else ""), placeholder="Enter your password", autocomplete="current-password") }}
+            {% for error in form.password.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-check mb-4">
+            {{ form.remember_me(class="form-check-input bg-dark border-secondary") }}
+            <label class="form-check-label text-secondary small" for="{{ form.remember_me.id }}">
+              {{ form.remember_me.label.text }}
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary-fg w-100 py-2 mb-3">
+            <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+          </button>
+        </form>
+
+        <!-- One-Click Recruiter Instant Demo Card -->
+        <div class="p-3 rounded bg-dark bg-opacity-50 border border-info border-opacity-25 mt-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-info fw-bold small"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Recruiter & Evaluator Access</span>
+            <span class="badge bg-info text-dark" style="font-size: 0.65rem;">Instant Isolated Session</span>
+          </div>
+          <p class="small text-secondary mb-3">
+            Explore a fully interactive live demonstration with pre-seeded baseline transactions without creating an account or entering credentials.
+          </p>
+          <form method="POST" action="{{ url_for('auth.demo_login') }}" id="login-demo-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="btn btn-outline-info w-100 py-2 btn-sm fw-bold demo-action-btn">
+              <i class="bi bi-play-circle-fill me-2"></i> Launch Instant Recruiter Demo
+            </button>
+          </form>
+        </div>
+
+        <div class="text-center mt-4 text-secondary small">
+          Don't have an account yet?
+          <a href="{{ url_for('auth.register') }}" class="text-info text-decoration-none fw-semibold ms-1">Register here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const demoForms = document.querySelectorAll('form[action="{{ url_for("auth.demo_login") }}"]');
+  demoForms.forEach(function(f) {
+    f.addEventListener('submit', function() {
+      const btn = f.querySelector('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Provisioning Demo Workspace...';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

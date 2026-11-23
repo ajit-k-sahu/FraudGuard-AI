@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Fraud Alerts - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-white mb-1">
+        <i class="bi bi-bell-fill text-warning me-2"></i> Fraud Alert Center
+      </h1>
+      <p class="text-secondary small mb-0">
+        Active security notifications, suspicious transaction alerts, and automated intervention triggers.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      {% if unread_total > 0 %}
+        <button type="button" class="btn btn-outline-fg" data-bs-toggle="modal" data-bs-target="#markAllModal">
+          <i class="bi bi-check2-all me-1"></i> Mark All as Read
+        </button>
+      {% endif %}
+      <a href="{{ url_for('transactions.analyze') }}" class="btn btn-primary-fg">
+        <i class="bi bi-plus-circle me-1"></i> New Analysis
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Badges Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="stat-label">Unread Notifications</span>
+            <div class="stat-value text-warning">{{ unread_total }}</div>
+          </div>
+          <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-bell"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="stat-label">Critical Incidents</span>
+            <div class="stat-value text-danger">{{ critical_total }}</div>
+          </div>
+          <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+            <i class="bi bi-shield-slash-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="stat-label">Medium Risk Alerts</span>
+            <div class="stat-value text-info">{{ medium_total }}</div>
+          </div>
+          <div class="stat-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-shield-exclamation"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Row -->
+  <div class="fg-card p-3 mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex flex-wrap gap-2">
+        <span class="text-secondary small fw-semibold me-2 align-self-center">Severity:</span>
+        <a href="{{ url_for('alerts.index', status=status) }}" class="btn btn-sm {{ 'btn-primary-fg' if not severity else 'btn-outline-fg' }}">All</a>
+        <a href="{{ url_for('alerts.index', severity='Critical', status=status) }}" class="btn btn-sm {{ 'btn-danger' if severity == 'Critical' else 'btn-outline-fg text-danger' }}">Critical</a>
+        <a href="{{ url_for('alerts.index', severity='High', status=status) }}" class="btn btn-sm {{ 'btn-warning' if severity == 'High' else 'btn-outline-fg text-warning' }}">High</a>
+        <a href="{{ url_for('alerts.index', severity='Medium', status=status) }}" class="btn btn-sm {{ 'btn-info text-dark' if severity == 'Medium' else 'btn-outline-fg text-info' }}">Medium</a>
+      </div>
+
+      <div class="d-flex gap-2">
+        <span class="text-secondary small fw-semibold me-2 align-self-center">Status:</span>
+        <a href="{{ url_for('alerts.index', severity=severity) }}" class="btn btn-sm {{ 'btn-secondary text-white' if not status else 'btn-outline-fg' }}">All</a>
+        <a href="{{ url_for('alerts.index', severity=severity, status='unread') }}" class="btn btn-sm {{ 'btn-warning text-dark' if status == 'unread' else 'btn-outline-fg' }}">Unread</a>
+        <a href="{{ url_for('alerts.index', severity=severity, status='read') }}" class="btn btn-sm {{ 'btn-success' if status == 'read' else 'btn-outline-fg' }}">Resolved</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts List -->
+  <div class="fg-card">
+    {% if alerts %}
+      <div class="list-group list-group-flush bg-transparent">
+        {% for alert in alerts %}
+          <div class="list-group-item bg-transparent border-secondary border-opacity-25 p-4 text-light {{ 'bg-dark bg-opacity-25' if not alert.is_read }}">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+              <div class="d-flex gap-3">
+                <div class="mt-1">
+                  {% if alert.severity in ['Critical', 'High'] %}
+                    <span class="stat-icon bg-danger bg-opacity-20 text-danger" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                      <i class="bi bi-shield-slash-fill"></i>
+                    </span>
+                  {% else %}
+                    <span class="stat-icon bg-warning bg-opacity-20 text-warning" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                      <i class="bi bi-shield-exclamation"></i>
+                    </span>
+                  {% endif %}
+                </div>
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge {{ 'badge-risk-high' if alert.severity in ['Critical', 'High'] else 'badge-risk-med' }}">
+                      {{ alert.severity }}
+                    </span>
+                    <h5 class="h6 fw-bold text-white mb-0">{{ alert.title }}</h5>
+                    {% if not alert.is_read %}
+                      <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">NEW</span>
+                    {% else %}
+                      <span class="badge bg-secondary" style="font-size: 0.65rem;">RESOLVED</span>
+                    {% endif %}
+                  </div>
+                  <p class="text-light small mb-2">{{ alert.message }}</p>
+                  <div class="d-flex align-items-center gap-3 small text-secondary">
+                    <span><i class="bi bi-clock me-1"></i>{{ alert.created_at | format_ist }}</span>
+                    {% if alert.transaction %}
+                      <span>
+                        Reference:
+                        <a href="{{ url_for('transactions.detail', txn_id=alert.transaction_id) }}" class="text-info text-decoration-none fw-semibold">
+                          {{ alert.transaction.transaction_ref }}
+                        </a>
+                      </span>
+                      <span>Amount: <strong class="text-white">${{ "{:,.2f}".format(alert.transaction.amount) }}</strong></span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-center gap-2">
+                {% if alert.transaction_id %}
+                  <a href="{{ url_for('transactions.detail', txn_id=alert.transaction_id) }}" class="btn btn-sm btn-outline-fg">
+                    <i class="bi bi-eye me-1"></i> View Transaction
+                  </a>
+                {% endif %}
+                {% if not alert.is_read %}
+                  <form method="POST" action="{{ url_for('alerts.mark_as_read', alert_id=alert.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Read">
+                      <i class="bi bi-check2"></i> Mark Read
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination.pages > 1 %}
+        <div class="p-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+          <small class="text-secondary">Page {{ pagination.page }} of {{ pagination.pages }}</small>
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              {% if pagination.has_prev %}
+                <li class="page-item">
+                  <a class="page-link bg-dark border-secondary text-light" href="{{ url_for('alerts.index', page=pagination.prev_num, severity=severity, status=status) }}">&laquo;</a>
+                </li>
+              {% endif %}
+              {% for p in pagination.iter_pages() %}
+                {% if p %}
+                  <li class="page-item {{ 'active' if p == pagination.page }}">
+                    <a class="page-link {{ 'bg-primary border-primary text-white' if p == pagination.page else 'bg-dark border-secondary text-light' }}" href="{{ url_for('alerts.index', page=p, severity=severity, status=status) }}">{{ p }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+              {% if pagination.has_next %}
+                <li class="page-item">
+                  <a class="page-link bg-dark border-secondary text-light" href="{{ url_for('alerts.index', page=pagination.next_num, severity=severity, status=status) }}">&raquo;</a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state py-5">
+        <i class="bi bi-shield-check text-success fs-1 d-block mb-3"></i>
+        <h4 class="h5 fw-bold text-white mb-2">No Active Alerts Found</h4>
+        <p class="text-secondary small mb-0">All transactions are operating within expected behavioral risk limits.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Confirmation Modal: Mark All Read -->
+<div class="modal fade" id="markAllModal" tabindex="-1" aria-labelledby="markAllModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-content-fg">
+      <div class="modal-header modal-header-fg">
+        <h5 class="modal-title h6 fw-bold" id="markAllModalLabel">
+          <i class="bi bi-check2-all text-info me-2"></i> Confirm Resolution
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-light small py-4">
+        Are you sure you want to mark all active fraud alerts as read and resolved? This action will clear the unread notification counter.
+      </div>
+      <div class="modal-footer modal-footer-fg">
+        <button type="button" class="btn btn-outline-fg btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <form method="POST" action="{{ url_for('alerts.mark_all_read') }}" class="d-inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-primary-fg btn-sm">Yes, Mark All Read</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

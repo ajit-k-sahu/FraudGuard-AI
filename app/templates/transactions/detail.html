@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction Detail - {{ transaction.transaction_ref }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Top Breadcrumb & Actions -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div class="d-flex align-items-center gap-2">
+      <a href="{{ url_for('transactions.history') }}" class="btn btn-sm btn-outline-fg">
+        <i class="bi bi-arrow-left me-1"></i> Back to History
+      </a>
+      <span class="text-muted">/</span>
+      <span class="text-info fw-bold">{{ transaction.transaction_ref }}</span>
+      {% if transaction.is_demo %}
+        <span class="badge bg-secondary" style="font-size: 0.68rem;">DEMO BENCHMARK</span>
+      {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-sm btn-outline-fg btn-copy-ref" data-ref="{{ transaction.transaction_ref }}">
+        <i class="bi bi-clipboard me-1"></i> Copy Reference
+      </button>
+      <a href="{{ url_for('transactions.analyze') }}" class="btn btn-sm btn-primary-fg">
+        <i class="bi bi-plus-circle me-1"></i> Evaluate Another
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Detail Column -->
+    <div class="col-lg-8">
+      <!-- Core Financial Profile Card -->
+      <div class="fg-card mb-4">
+        <div class="fg-card-header">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-receipt text-info"></i>
+            <h5 class="h6 fw-bold text-white mb-0">Financial Telemetry Overview</h5>
+          </div>
+          <span class="text-secondary small fw-medium"><i class="bi bi-clock me-1"></i>{{ transaction.created_at | format_ist }}</span>
+        </div>
+        <div class="fg-card-body">
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <span class="stat-label">Amount</span>
+              <div class="stat-value text-white">${{ "{:,.2f}".format(transaction.amount) }}</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <span class="stat-label">Type</span>
+              <div class="h4 fw-bold text-light mb-0">{{ transaction.transaction_type }}</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <span class="stat-label">Channel</span>
+              <div class="h5 fw-bold text-light mb-0">{{ transaction.channel }}</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <span class="stat-label">Historical Baseline</span>
+              <div class="h5 fw-bold text-light mb-0">${{ "{:,.2f}".format(transaction.previous_amount) }}</div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary border-opacity-25">
+                <span class="text-secondary small fw-bold text-uppercase d-block mb-2">Originating Account (Sender)</span>
+                <div class="text-white fw-bold mb-1">{{ transaction.sender_account }}</div>
+                <div class="small text-muted d-flex justify-content-between mb-1">
+                  <span>Pre-Transaction Balance:</span>
+                  <span class="text-light">${{ "{:,.2f}".format(transaction.old_balance_orig) }}</span>
+                </div>
+                <div class="small text-muted d-flex justify-content-between">
+                  <span>Post-Transaction Balance:</span>
+                  <span class="text-light">${{ "{:,.2f}".format(transaction.new_balance_orig) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="p-3 bg-dark bg-opacity-50 rounded border border-secondary border-opacity-25">
+                <span class="text-secondary small fw-bold text-uppercase d-block mb-2">Destination Account (Receiver)</span>
+                <div class="text-white fw-bold mb-1">{{ transaction.receiver_account }}</div>
+                <div class="small text-muted d-flex justify-content-between mb-1">
+                  <span>Pre-Transaction Balance:</span>
+                  <span class="text-light">${{ "{:,.2f}".format(transaction.old_balance_dest) }}</span>
+                </div>
+                <div class="small text-muted d-flex justify-content-between">
+                  <span>Post-Transaction Balance:</span>
+                  <span class="text-light">${{ "{:,.2f}".format(transaction.new_balance_dest) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Device & Behavioral Context Card -->
+      <div class="fg-card mb-4">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">
+            <i class="bi bi-shield-shaded text-info me-2"></i> Behavioral & Security Context
+          </h5>
+        </div>
+        <div class="fg-card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25 small">
+                <span class="text-secondary fw-medium">Originating Location:</span>
+                <span class="text-white fw-semibold">{{ transaction.location }}</span>
+              </div>
+              <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25 small">
+                <span class="text-secondary fw-medium">Device Profile:</span>
+                <span class="text-white fw-semibold">{{ transaction.device }}</span>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25 small">
+                <span class="text-secondary fw-medium">24-Hour Velocity:</span>
+                <span class="text-white fw-semibold">{{ transaction.frequency_24h }} transactions</span>
+              </div>
+              <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25 small">
+                <span class="text-secondary fw-medium">Account Tenure:</span>
+                <span class="text-white fw-semibold">{{ transaction.account_age_days }} days old</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Triggered Alerts Section -->
+      {% if alerts %}
+        <div class="fg-card">
+          <div class="fg-card-header">
+            <h5 class="h6 fw-bold text-white mb-0">
+              <i class="bi bi-bell-fill text-warning me-2"></i> Triggered Security Alerts ({{ alerts | length }})
+            </h5>
+          </div>
+          <div class="list-group list-group-flush bg-transparent">
+            {% for alert in alerts %}
+              <div class="list-group-item bg-transparent border-secondary border-opacity-25 p-3 text-light">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="badge {{ 'badge-risk-high' if alert.severity in ['High', 'Critical'] else 'badge-risk-med' }}">
+                    {{ alert.severity }}
+                  </span>
+                  <small class="text-secondary fw-medium">{{ alert.created_at | format_ist }}</small>
+                </div>
+                <div class="fw-bold text-white mb-1">{{ alert.title }}</div>
+                <p class="small text-light mb-0">{{ alert.message }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Machine Learning Decision Sidebar -->
+    <div class="col-lg-4">
+      {% if prediction %}
+        <div class="fg-card border-{{ 'danger' if prediction.risk_level == 'High' else ('warning' if prediction.risk_level == 'Medium' else 'success') }}">
+          <div class="fg-card-header bg-dark bg-opacity-50">
+            <div class="d-flex align-items-center gap-2">
+              {% if prediction.risk_level == 'High' %}
+                <span class="badge badge-risk-high"><i class="bi bi-shield-slash-fill me-1"></i> HIGH RISK</span>
+              {% elif prediction.risk_level == 'Medium' %}
+                <span class="badge badge-risk-med"><i class="bi bi-shield-exclamation me-1"></i> MEDIUM RISK</span>
+              {% else %}
+                <span class="badge badge-risk-low"><i class="bi bi-shield-check me-1"></i> LOW RISK</span>
+              {% endif %}
+            </div>
+            <span class="badge bg-secondary small">{{ prediction.model_name }}</span>
+          </div>
+          <div class="fg-card-body">
+            <!-- Probability Dial -->
+            <div class="text-center risk-meter-container mb-3">
+              <span class="text-secondary small text-uppercase fw-bold">Probability Estimate</span>
+              <div class="display-6 fw-bold my-1 {{ 'text-danger' if prediction.fraud_probability >= 0.70 else ('text-warning' if prediction.fraud_probability >= 0.30 else 'text-success') }}">
+                {{ "{:.1%}".format(prediction.fraud_probability) }}
+              </div>
+              <div class="progress risk-progress my-2">
+                <div class="progress-bar {{ 'bg-danger' if prediction.fraud_probability >= 0.70 else ('bg-warning' if prediction.fraud_probability >= 0.30 else 'bg-success') }}"
+                     style="width: {{ prediction.fraud_probability * 100 }}%;"></div>
+              </div>
+              <small class="text-secondary" style="font-size: 0.82rem;">
+                Classification: <strong class="text-white">{{ 'Fraudulent' if prediction.is_fraud_predicted else 'Legitimate' }}</strong>
+              </small>
+            </div>
+
+            <!-- Explainability Factors -->
+            <div class="mb-3">
+              <span class="text-white small fw-bold text-uppercase d-block mb-2">Model Decision Explanations:</span>
+              <ul class="list-unstyled small mb-0">
+                {% for factor in prediction.get_explanations() %}
+                  <li class="mb-2 text-white d-flex gap-2">
+                    <i class="bi bi-arrow-right-short text-info fs-6"></i>
+                    <span>{{ factor }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <!-- Action -->
+            <div class="p-3 rounded mb-3" style="background: {{ 'rgba(239, 68, 68, 0.12)' if prediction.risk_level == 'High' else ('rgba(245, 158, 11, 0.12)' if prediction.risk_level == 'Medium' else 'rgba(16, 185, 129, 0.12)') }}; border: 1px solid {{ 'rgba(239, 68, 68, 0.3)' if prediction.risk_level == 'High' else ('rgba(245, 158, 11, 0.3)' if prediction.risk_level == 'Medium' else 'rgba(16, 185, 129, 0.3)') }};">
+              <span class="small fw-bold text-uppercase d-block mb-1 {{ 'text-danger' if prediction.risk_level == 'High' else ('text-warning' if prediction.risk_level == 'Medium' else 'text-success') }}">
+                Action Protocol:
+              </span>
+              <p class="small text-light mb-0">{{ prediction.recommended_action }}</p>
+            </div>
+
+            <div class="text-muted" style="font-size: 0.72rem;">
+              <em>Model estimates represent probabilistic inferences based on training patterns, not legal or certified fraud determinations.</em>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

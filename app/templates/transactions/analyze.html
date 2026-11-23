@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Transaction - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-white mb-1">
+        <i class="bi bi-cpu text-info me-2"></i> Real-Time Transaction Risk Evaluation
+      </h1>
+      <p class="text-muted small mb-0">
+        Submit transaction telemetry for instant anomaly classification, risk scoring, and explainable decision factors.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('transactions.history') }}" class="btn btn-outline-fg">
+        <i class="bi bi-clock-history me-1"></i> View History
+      </a>
+      <a href="{{ url_for('transactions.batch') }}" class="btn btn-outline-fg">
+        <i class="bi bi-cloud-arrow-up me-1"></i> Batch CSV
+      </a>
+    </div>
+  </div>
+
+  <!-- Scenario Quick Test Presets -->
+  <div class="fg-card p-3 mb-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <span class="text-white small fw-bold">
+        <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Test Scenarios:
+      </span>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" id="btn-preset-normal" class="btn btn-sm btn-outline-fg">
+          <i class="bi bi-check-circle text-success me-1"></i> Legitimate Payment
+        </button>
+        <button type="button" id="btn-preset-drain" class="btn btn-sm btn-outline-fg">
+          <i class="bi bi-exclamation-triangle text-danger me-1"></i> Account Takeover Drain
+        </button>
+        <button type="button" id="btn-preset-velocity" class="btn btn-sm btn-outline-fg">
+          <i class="bi bi-speedometer text-warning me-1"></i> Velocity Burst Attack
+        </button>
+        <button type="button" id="btn-preset-newacc" class="btn btn-sm btn-outline-fg">
+          <i class="bi bi-shield-slash text-danger me-1"></i> New Account High-Value
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Transaction Input Form -->
+    <div class="col-lg-7">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">
+            <i class="bi bi-pencil-square text-info me-2"></i> Transaction Details
+          </h5>
+          <span class="badge bg-dark border border-secondary text-muted">Scikit-Learn ML Ingestion</span>
+        </div>
+        <div class="fg-card-body">
+          <form method="POST" action="{{ url_for('transactions.analyze') }}" id="transaction-analysis-form" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label form-label-fg">{{ form.amount.label.text }}</label>
+                {{ form.amount(class="form-control form-control-fg" + (" is-invalid" if form.amount.errors else ""), id="amount", step="0.01") }}
+                {% for err in form.amount.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-fg">{{ form.transaction_type.label.text }}</label>
+                {{ form.transaction_type(class="form-select form-select-fg" + (" is-invalid" if form.transaction_type.errors else ""), id="transaction_type") }}
+                {% for err in form.transaction_type.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label form-label-fg">{{ form.sender_account.label.text }}</label>
+                {{ form.sender_account(class="form-control form-control-fg" + (" is-invalid" if form.sender_account.errors else ""), id="sender_account") }}
+                {% for err in form.sender_account.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-fg">{{ form.receiver_account.label.text }}</label>
+                {{ form.receiver_account(class="form-control form-control-fg" + (" is-invalid" if form.receiver_account.errors else ""), id="receiver_account") }}
+                {% for err in form.receiver_account.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label form-label-fg">{{ form.channel.label.text }}</label>
+                {{ form.channel(class="form-select form-select-fg" + (" is-invalid" if form.channel.errors else ""), id="channel") }}
+                {% for err in form.channel.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label form-label-fg">{{ form.location.label.text }}</label>
+                {{ form.location(class="form-select form-select-fg" + (" is-invalid" if form.location.errors else ""), id="location") }}
+                {% for err in form.location.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label form-label-fg">{{ form.device.label.text }}</label>
+              {{ form.device(class="form-select form-select-fg" + (" is-invalid" if form.device.errors else ""), id="device") }}
+              {% for err in form.device.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <label class="form-label form-label-fg">{{ form.frequency_24h.label.text }}</label>
+                {{ form.frequency_24h(class="form-control form-control-fg" + (" is-invalid" if form.frequency_24h.errors else ""), id="frequency_24h") }}
+                {% for err in form.frequency_24h.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label form-label-fg">{{ form.account_age_days.label.text }}</label>
+                {{ form.account_age_days(class="form-control form-control-fg" + (" is-invalid" if form.account_age_days.errors else ""), id="account_age_days") }}
+                {% for err in form.account_age_days.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label form-label-fg">{{ form.previous_amount.label.text }}</label>
+                {{ form.previous_amount(class="form-control form-control-fg" + (" is-invalid" if form.previous_amount.errors else ""), id="previous_amount", step="0.01") }}
+                {% for err in form.previous_amount.errors %}<div class="invalid-feedback">{{ err }}</div>{% endfor %}
+              </div>
+            </div>
+
+            <button type="submit" id="submit-analysis-btn" class="btn btn-primary-fg w-100 py-2">
+              <i class="bi bi-shield-check me-2"></i> Evaluate Transaction with AI
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Evaluation Result -->
+    <div class="col-lg-5">
+      {% if result %}
+        {% set txn = result.transaction %}
+        {% set pred = result.prediction %}
+        <div class="fg-card border-{{ 'danger' if pred.risk_level == 'High' else ('warning' if pred.risk_level == 'Medium' else 'success') }} shadow-lg">
+          <div class="fg-card-header bg-dark bg-opacity-50">
+            <div class="d-flex align-items-center gap-2">
+              {% if pred.risk_level == 'High' %}
+                <span class="badge badge-risk-high fs-6"><i class="bi bi-shield-slash-fill me-1"></i> HIGH RISK</span>
+              {% elif pred.risk_level == 'Medium' %}
+                <span class="badge badge-risk-med fs-6"><i class="bi bi-shield-exclamation me-1"></i> MEDIUM RISK</span>
+              {% else %}
+                <span class="badge badge-risk-low fs-6"><i class="bi bi-shield-check me-1"></i> LOW RISK</span>
+              {% endif %}
+              <span class="text-white fw-bold">Prediction Result</span>
+            </div>
+            <span class="badge bg-secondary small">{{ pred.model_name }}</span>
+          </div>
+
+          <div class="fg-card-body">
+            <!-- Probability Gauge -->
+            <div class="risk-meter-container mb-4 text-center">
+              <div class="text-secondary small text-uppercase fw-bold mb-1">Calculated Fraud Probability</div>
+              <div class="display-5 fw-bold {{ 'text-danger' if pred.fraud_probability >= 0.70 else ('text-warning' if pred.fraud_probability >= 0.30 else 'text-success') }}">
+                {{ "{:.1%}".format(pred.fraud_probability) }}
+              </div>
+              <div class="progress risk-progress my-3">
+                <div class="progress-bar {{ 'bg-danger' if pred.fraud_probability >= 0.70 else ('bg-warning' if pred.fraud_probability >= 0.30 else 'bg-success') }}"
+                     style="width: {{ pred.fraud_probability * 100 }}%;"></div>
+              </div>
+              <div class="d-flex justify-content-between text-secondary" style="font-size: 0.82rem; font-weight: 500;">
+                <span>0% Safe</span>
+                <span>Threshold: 30% Suspicious</span>
+                <span>70% High Risk</span>
+                <span>100% Fraud</span>
+              </div>
+            </div>
+
+            <!-- Transaction Reference Summary -->
+            <div class="p-3 fg-detail-box rounded mb-3">
+              <div class="d-flex justify-content-between small text-secondary mb-1">
+                <span>Reference:</span>
+                <span class="text-info fw-semibold">{{ txn.transaction_ref }}</span>
+              </div>
+              <div class="d-flex justify-content-between small text-secondary mb-1">
+                <span>Amount:</span>
+                <span class="text-white fw-bold">${{ "{:,.2f}".format(txn.amount) }}</span>
+              </div>
+              <div class="d-flex justify-content-between small text-secondary mb-1">
+                <span>Type & Route:</span>
+                <span class="text-white fw-medium">{{ txn.transaction_type }} &bull; {{ txn.channel }}</span>
+              </div>
+              <div class="d-flex justify-content-between small text-secondary">
+                <span>Classification:</span>
+                <span class="fw-bold {{ 'text-danger' if pred.is_fraud_predicted else 'text-success' }}">
+                  {{ 'Predicted Fraudulent' if pred.is_fraud_predicted else 'Predicted Legitimate' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Contributing Risk Factors -->
+            <div class="mb-3">
+              <h6 class="text-uppercase text-white fw-bold small mb-2">
+                <i class="bi bi-diagram-3 text-info me-1"></i> Contributing Risk Factors
+              </h6>
+              <ul class="list-group list-group-flush bg-transparent">
+                {% for factor in pred.get_explanations() %}
+                  <li class="list-group-item bg-transparent px-0 py-2 text-white small border-secondary border-opacity-25 d-flex gap-2">
+                    <i class="bi bi-arrow-right-short text-info fs-6"></i>
+                    <span>{{ factor }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+
+            <!-- Recommended Operational Action -->
+            <div class="p-3 rounded mb-3" style="background: {{ 'rgba(239, 68, 68, 0.12)' if pred.risk_level == 'High' else ('rgba(245, 158, 11, 0.12)' if pred.risk_level == 'Medium' else 'rgba(16, 185, 129, 0.12)') }}; border: 1px solid {{ 'rgba(239, 68, 68, 0.3)' if pred.risk_level == 'High' else ('rgba(245, 158, 11, 0.3)' if pred.risk_level == 'Medium' else 'rgba(16, 185, 129, 0.3)') }};">
+              <div class="small fw-bold text-uppercase mb-1 {{ 'text-danger' if pred.risk_level == 'High' else ('text-warning' if pred.risk_level == 'Medium' else 'text-success') }}">
+                <i class="bi bi-shield-check me-1"></i> Recommended Action:
+              </div>
+              <p class="small text-light mb-0">{{ pred.recommended_action }}</p>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="{{ url_for('transactions.detail', txn_id=txn.id) }}" class="btn btn-outline-fg btn-sm">
+                <i class="bi bi-receipt me-1"></i> View Full Audit Log
+              </a>
+              <span class="text-muted" style="font-size: 0.72rem;">Saved to database</span>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <!-- Standby Placeholder Card -->
+        <div class="fg-card p-4 text-center h-100 d-flex flex-column justify-content-center align-items-center">
+          <div class="empty-state-icon text-muted mb-3">
+            <i class="bi bi-shield-radar"></i>
+          </div>
+          <h5 class="h6 fw-bold text-white mb-2">Awaiting Transaction Submission</h5>
+          <p class="text-muted small mb-4" style="max-width: 360px;">
+            Fill in the parameters on the left or click any quick preset scenario to trigger the machine learning inference pipeline.
+          </p>
+          <div class="p-3 bg-dark bg-opacity-40 rounded text-start w-100 border border-secondary border-opacity-25 small text-muted">
+            <div class="fw-bold text-white mb-1"><i class="bi bi-info-circle text-info me-1"></i> What happens next:</div>
+            <div>1. Features transformed through scikit-learn pipeline.</div>
+            <div>2. Anomaly indicators computed against PaySim behavioral model.</div>
+            <div>3. Probability and risk tier mapped (Low / Med / High).</div>
+            <div>4. Suspicious patterns trigger automatic fraud alerts.</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

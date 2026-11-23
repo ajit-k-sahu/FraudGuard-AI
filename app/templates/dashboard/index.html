@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-white mb-1">
+        <i class="bi bi-speedometer2 text-info me-2"></i> Fraud Intelligence Dashboard
+      </h1>
+      <p class="text-muted small mb-0">
+        Continuous transaction telemetry, live anomaly classification, and active risk alerts.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('transactions.analyze') }}" class="btn btn-primary-fg">
+        <i class="bi bi-plus-circle me-1"></i> Quick Analysis
+      </a>
+      <a href="{{ url_for('transactions.batch') }}" class="btn btn-outline-fg">
+        <i class="bi bi-cloud-arrow-up me-1"></i> Batch Upload
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-label">Total Analyzed</span>
+          <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-receipt"></i>
+          </div>
+        </div>
+        <div class="stat-value">{{ summary.total_analyzed | number_format if summary.total_analyzed else '0' }}</div>
+        <div class="d-flex align-items-center gap-1 text-secondary small mt-1">
+          <span>Total evaluated stream</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-label">Legitimate Volume</span>
+          <div class="stat-icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-shield-check"></i>
+          </div>
+        </div>
+        <div class="stat-value text-success">{{ summary.legitimate_count }}</div>
+        <div class="d-flex align-items-center gap-1 text-secondary small mt-1">
+          <span>Verified low-risk</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-label">Predicted Fraud</span>
+          <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+            <i class="bi bi-shield-slash-fill"></i>
+          </div>
+        </div>
+        <div class="stat-value text-danger">{{ summary.fraud_count }}</div>
+        <div class="d-flex align-items-center gap-1 text-secondary small mt-1">
+          <span>High-risk / Flagged</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="stat-label">Fraud Flag Rate</span>
+          <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-percent"></i>
+          </div>
+        </div>
+        <div class="stat-value text-warning">{{ summary.fraud_rate }}%</div>
+        <div class="d-flex align-items-center gap-1 text-secondary small mt-1">
+          <span>{{ summary.suspicious_count }} suspicious on review</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if summary.has_data %}
+    <!-- Chart Visualizations -->
+    <div class="row g-3 mb-4">
+      <!-- 7-Day Trend Line -->
+      <div class="col-lg-8">
+        <div class="fg-card h-100">
+          <div class="fg-card-header">
+            <div>
+              <h5 class="h6 fw-bold text-white mb-0">Transaction Volume & Detection Velocity</h5>
+              <small class="text-secondary">7-day continuous monitoring stream</small>
+            </div>
+            <span class="badge bg-dark border border-secondary text-info">Live DB Stream</span>
+          </div>
+          <div class="fg-card-body" style="height: 280px;">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fraud vs Legit Donut -->
+      <div class="col-lg-4">
+        <div class="fg-card h-100">
+          <div class="fg-card-header">
+            <div>
+              <h5 class="h6 fw-bold text-white mb-0">Outcome Distribution</h5>
+              <small class="text-secondary">Legitimate vs Predicted Fraud</small>
+            </div>
+          </div>
+          <div class="fg-card-body" style="height: 280px;">
+            <canvas id="outcomeChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Distribution Doughnut -->
+      <div class="col-lg-4">
+        <div class="fg-card h-100">
+          <div class="fg-card-header">
+            <h5 class="h6 fw-bold text-white mb-0">Risk Stratification</h5>
+            <small class="text-secondary">Low / Medium / High</small>
+          </div>
+          <div class="fg-card-body" style="height: 250px;">
+            <canvas id="riskChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transaction Types Bar Chart -->
+      <div class="col-lg-8">
+        <div class="fg-card h-100">
+          <div class="fg-card-header">
+            <h5 class="h6 fw-bold text-white mb-0">Volume by Transaction Type</h5>
+            <small class="text-secondary">Transfer, Payment, Cash Out, Deposit, Purchase</small>
+          </div>
+          <div class="fg-card-body" style="height: 250px;">
+            <canvas id="typeChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tables Row: Recent Activity & High Risk Watchlist -->
+    <div class="row g-3">
+      <!-- Recent Transactions -->
+      <div class="col-lg-8">
+        <div class="fg-card h-100">
+          <div class="fg-card-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-clock-history text-info"></i>
+              <h5 class="h6 fw-bold text-white mb-0">Recent Evaluated Transactions</h5>
+            </div>
+            <a href="{{ url_for('transactions.history') }}" class="btn btn-sm btn-outline-fg">View All</a>
+          </div>
+          <div class="table-responsive">
+            <table class="table-fg mb-0">
+              <thead>
+                <tr>
+                  <th>Ref ID</th>
+                  <th>Amount</th>
+                  <th>Type</th>
+                  <th>Channel</th>
+                  <th>Probability</th>
+                  <th>Risk</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for txn in recent_txns %}
+                  <tr>
+                    <td>
+                      <a href="{{ url_for('transactions.detail', txn_id=txn.id) }}" class="text-info text-decoration-none fw-semibold">
+                        {{ txn.transaction_ref }}
+                      </a>
+                      {% if txn.is_demo %}
+                        <span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">DEMO</span>
+                      {% endif %}
+                    </td>
+                    <td class="fw-bold text-white">${{ "{:,.2f}".format(txn.amount) }}</td>
+                    <td class="text-white fw-semibold">{{ txn.transaction_type }}</td>
+                    <td><small class="text-secondary">{{ txn.channel }}</small></td>
+                    <td>
+                      {% if txn.prediction %}
+                        <span class="fw-bold fs-6 {{ 'text-danger' if txn.prediction.fraud_probability >= 0.70 else ('text-warning' if txn.prediction.fraud_probability >= 0.30 else 'text-success') }}">
+                          {{ "{:.1%}".format(txn.prediction.fraud_probability) }}
+                        </span>
+                      {% else %}
+                        <span class="text-secondary">N/A</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if txn.prediction %}
+                        {% if txn.prediction.risk_level == 'High' %}
+                          <span class="badge badge-risk-high"><i class="bi bi-shield-slash-fill me-1"></i> High</span>
+                        {% elif txn.prediction.risk_level == 'Medium' %}
+                          <span class="badge badge-risk-med"><i class="bi bi-shield-exclamation me-1"></i> Med</span>
+                        {% else %}
+                          <span class="badge badge-risk-low"><i class="bi bi-shield-check me-1"></i> Low</span>
+                        {% endif %}
+                      {% endif %}
+                    </td>
+                    <td>
+                      <a href="{{ url_for('transactions.detail', txn_id=txn.id) }}" class="btn btn-sm btn-outline-fg py-1 px-2">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- High-Risk Watchlist -->
+      <div class="col-lg-4">
+        <div class="fg-card h-100">
+          <div class="fg-card-header">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+              <h5 class="h6 fw-bold text-white mb-0">High-Risk Incidents</h5>
+            </div>
+            <a href="{{ url_for('alerts.index') }}" class="btn btn-sm btn-outline-fg">Alerts</a>
+          </div>
+          <div class="fg-card-body p-0">
+            {% if recent_high_risk %}
+              <div class="list-group list-group-flush bg-transparent">
+                {% for txn in recent_high_risk %}
+                  <a href="{{ url_for('transactions.detail', txn_id=txn.id) }}" class="list-group-item list-group-item-action bg-transparent border-secondary border-opacity-25 p-3 text-light">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="fw-bold text-white">${{ "{:,.2f}".format(txn.amount) }}</span>
+                      <span class="badge badge-risk-high">{{ "{:.0%}".format(txn.prediction.fraud_probability) }} Fraud Risk</span>
+                    </div>
+                    <div class="small text-muted mb-1">{{ txn.transaction_type }} via {{ txn.channel }}</div>
+                    <div class="small text-info text-truncate">
+                      <i class="bi bi-geo-alt me-1"></i>{{ txn.location }} &bull; {{ txn.device }}
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="p-4 text-center text-muted small">
+                <i class="bi bi-shield-check text-success fs-3 mb-2 d-block"></i>
+                No high-risk transactions recorded recently.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <!-- Empty State -->
+    <div class="fg-card empty-state">
+      <div class="empty-state-icon">
+        <i class="bi bi-inbox"></i>
+      </div>
+      <h3 class="h4 fw-bold text-white mb-2">No Transactions Evaluated Yet</h3>
+      <p class="text-muted mx-auto mb-4" style="max-width: 480px;">
+        Start by evaluating a single transaction or upload a batch CSV file to view real-time risk scores, telemetry distributions, and anomaly alerts.
+      </p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('transactions.analyze') }}" class="btn btn-primary-fg">
+          <i class="bi bi-cpu me-2"></i> Analyze Single Transaction
+        </a>
+        <a href="{{ url_for('transactions.batch') }}" class="btn btn-outline-fg">
+          <i class="bi bi-cloud-arrow-up me-2"></i> Batch CSV Upload
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const chartPayload = {{ charts | tojson if charts else '{}' }};
+    initDashboardCharts(chartPayload);
+  });
+</script>
+{% endblock %}

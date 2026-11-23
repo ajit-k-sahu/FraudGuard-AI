@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics & Risk Telemetry - FraudGuard AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-white mb-1">
+        <i class="bi bi-graph-up-arrow text-info me-2"></i> Fraud Analytics & Statistical Telemetry
+      </h1>
+      <p class="text-secondary small mb-0">
+        Aggregate transaction distributions, risk exposure analysis, and historical machine learning metrics.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('transactions.history') }}" class="btn btn-outline-fg">
+        <i class="bi bi-receipt-cutoff me-1"></i> Transaction Table
+      </a>
+      <a href="{{ url_for('transactions.analyze') }}" class="btn btn-primary-fg">
+        <i class="bi bi-cpu me-1"></i> New Analysis
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Summary Header -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-label">Total Processed Volume</span>
+        <div class="stat-value text-info mb-1">${{ "{:,.2f}".format(summary.total_volume) }}</div>
+        <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Gross Evaluated Capital</small>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-label">Overall Fraud Rate</span>
+        <div class="stat-value text-warning mb-1">{{ summary.fraud_rate }}%</div>
+        <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Flagged Transactions</small>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-label">Legitimate Volume</span>
+        <div class="stat-value text-success mb-1">{{ summary.legitimate_count }}</div>
+        <small class="text-secondary fw-medium" style="font-size: 0.8rem;">Verified Transactions</small>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <span class="stat-label">Critical Incidents</span>
+        <div class="stat-value text-danger mb-1">{{ summary.high_risk_count }}</div>
+        <small class="text-secondary fw-medium" style="font-size: 0.8rem;">High-Risk Intervention</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 1: 7-Day Trend Line & Outcome Donut -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <div>
+            <h5 class="h6 fw-bold text-white mb-0">Daily Volume & Detection Velocity (Past 7 Days)</h5>
+            <small class="text-secondary">Dollar volume (left axis) vs Flagged count (right axis)</small>
+          </div>
+          <span class="badge bg-dark border border-secondary text-info">Live Stream</span>
+        </div>
+        <div class="fg-card-body" style="height: 300px;">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">Outcome Proportion</h5>
+          <small class="text-secondary">Legitimate vs Fraudulent</small>
+        </div>
+        <div class="fg-card-body" style="height: 300px;">
+          <canvas id="outcomeChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row 2: Risk Stratification, Types & Amount Comparison -->
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">Risk Stratification Breakdown</h5>
+          <small class="text-secondary">Low (&lt;30%), Med (30-70%), High (&ge;70%)</small>
+        </div>
+        <div class="fg-card-body" style="height: 270px;">
+          <canvas id="riskChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">Transaction Type Distribution</h5>
+          <small class="text-secondary">Volume counts across financial channels</small>
+        </div>
+        <div class="fg-card-body" style="height: 270px;">
+          <canvas id="typeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="fg-card h-100">
+        <div class="fg-card-header">
+          <h5 class="h6 fw-bold text-white mb-0">Average Transaction Amount ($)</h5>
+          <small class="text-secondary">Legitimate vs Fraudulent Size Comparison</small>
+        </div>
+        <div class="fg-card-body" style="height: 270px;">
+          <canvas id="amountComparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const chartPayload = {{ charts | tojson if charts else '{}' }};
+    initDashboardCharts(chartPayload);
+
+    // Initialize Amount Comparison Chart
+    const amtCanvas = document.getElementById('amountComparisonChart');
+    if (amtCanvas && chartPayload.amount_comparison) {
+      new Chart(amtCanvas, {
+        type: 'bar',
+        data: {
+          labels: chartPayload.amount_comparison.labels,
+          datasets: [{
+            label: 'Average Amount ($)',
+            data: chartPayload.amount_comparison.values,
+            backgroundColor: ['#10b981', '#ef4444'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#cbd5e1', font: { size: 11, weight: 500 } }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: {
+                color: '#cbd5e1',
+                font: { size: 11, weight: 500 },
+                callback: val => '$' + Number(val).toLocaleString()
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

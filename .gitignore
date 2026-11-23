@@ -1,0 +1,25 @@
+# FraudGuard AI gitignore
+__pycache__/
+*.pyc
+.pytest_cache/
+instance/*.db
+instance/mpl_cache/
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+dataset/*.csv
+ml/artifacts/*.joblib.bak
+*.db
+*.sqlite
+*.sqlite3
+*.key
+*.pem
+*.cert
+*.crt
+*.pfx
+*.p12
+secrets/
+*.log
+
