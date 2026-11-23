@@ -92,7 +92,7 @@ FraudGuard -AI uses machine learning for probability estimation alongside rule-a
 - **Quick Test Scenarios**: Pre-configured buttons to quickly test legitimate spending, high velocity bursts, and balance drain attacks.
 - **Probability Gauge**: Visual display showing calculated fraud probability from $0.0\%$ to $100.0\%$.
 - **Three Operational Risk Levels**:
-  - 🟢 **Low Risk** ($< 30\%$): Approved automatically; low likelihood of fraud.
+  - 🟢 **Low Risk** ($< 30\%$): Classified as Low Risk; low likelihood of fraud.
   - 🟡 **Medium Risk** ($30\% - 69.9\%$): Triggers a Medium-severity alert; recommended for step-up verification.
   - 🔴 **High Risk** ($\ge 70\%$): Triggers a Critical-severity alert; recommended for immediate transaction hold.
 - **Risk Factor Cards**: Shows plain-language reasons why the transaction was flagged (such as rapid balance drain or unrecognized device).
@@ -146,7 +146,7 @@ The Random Forest model (`pipeline.joblib`) was evaluated on a held-out test spl
 | **Backend Framework** | **Python** | 3.10 – 3.14 | Core programming language |
 | | **Flask** | 3.1.3 | Web framework, application factory, and routing |
 | | **Werkzeug** | 3.0+ | Password hashing (Scrypt), request utilities, and ProxyFix middleware |
-| **Database & ORM** | **SQLAlchemy** | 3.1.1 | ORM for database models and queries |
+| **Database & ORM** | **Flask-SQLAlchemy** | >=3.1.0 | ORM for database models and queries |
 | | **SQLite 3** | Built-in | Local development and testing database |
 | | **PostgreSQL** | 16+ Ready | Production database via `psycopg2-binary` |
 | **Caching & Rate Limiting** | **Redis** | 7+ Ready | Rate limit storage backend via `Flask-Limiter` and `redis-py` |
