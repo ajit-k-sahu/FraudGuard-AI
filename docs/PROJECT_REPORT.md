@@ -112,17 +112,12 @@ The system follows a clean modular Model-View-Controller (MVC) architecture with
 
 ## 6. Verification & Automated Testing
 
-The platform is fortified by a comprehensive automated test suite consisting of **40 test cases** across 8 specialized test modules:
-- `tests/test_audit_verification.py`: App factory initialization, password security, model artifact integrity, and health API.
-- `tests/test_frontend_views.py`: Route accessibility, template inheritance, form submissions, and RBAC boundary enforcement.
-- `tests/test_auth.py`: Registration, duplicate email prevention, password mismatch, session handling, deactivated account rejection, and route protection.
-- `tests/test_transactions.py`: Single transaction analysis, low vs. high risk scoring, history filters, owner privacy isolation, and CSV export.
-- `tests/test_ml_prediction.py`: Singleton MLService, feature engineering, probability calibration, risk tiering, and explainability strings.
-- `tests/test_batch.py`: Batch template sample download, multi-record CSV processing, and error handling.
-- `tests/test_alerts.py`: Automatic alert generation on high risk, alert list views, single mark-as-read, and bulk mark-all-read.
-- `tests/test_api.py`: REST API endpoints, health monitoring, API authentication, real-time prediction, batch predictions, and model diagnostics.
+The platform is fortified by a comprehensive automated test suite consisting of **250 test cases** across 22 specialized test modules:
+- **Core Application & Views:** `tests/test_alerts.py`, `tests/test_api.py`, `tests/test_audit_verification.py`, `tests/test_auth.py`, `tests/test_batch.py`, `tests/test_file_upload_and_validation.py`, `tests/test_frontend_views.py`, `tests/test_transactions.py`, `tests/test_timezone.py`, `tests/test_ml_prediction.py`.
+- **Recruiter Demo Security & Expiration:** `tests/test_demo_account_security.py`, `tests/test_demo_cleanup.py`, `tests/test_demo_expiration_and_migration.py`, `tests/test_demo_isolation.py`, `tests/test_one_click_demo_login.py`.
+- **Infrastructure, WSGI & Production Security:** `tests/test_free_tier_hosting.py`, `tests/test_gunicorn_and_proxy.py`, `tests/test_postgres_config.py`, `tests/test_production_secrets_hardening.py`, `tests/test_rate_limiting.py`, `tests/test_redis_ratelimit.py`, `tests/test_security_headers_and_csrf.py`.
 
-**Test Execution Result:** **40 Passed, 0 Failed (100% Pass Rate).**
+**Test Execution Result:** **250 Passed, 0 Failed (100% Pass Rate).**
 
 ---
 

@@ -4,7 +4,7 @@
 [![Flask](https://img.shields.io/badge/Flask-3.1.3-green.svg)](https://palletsprojects.com/p/flask/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.8.0-orange.svg)](https://scikit-learn.org/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.3-purple.svg)](https://getbootstrap.com/)
-[![Tests](https://img.shields.io/badge/Pytest-40%20Passed%20(100%25)-brightgreen.svg)](https://pytest.org/)
+[![Tests](https://img.shields.io/badge/Pytest-250%20Passed%20(100%25)-brightgreen.svg)](https://pytest.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 
@@ -20,8 +20,8 @@ Built as an academic capstone and high-impact portfolio system, FraudGuard AI is
 - [Machine Learning Pipeline & Forensic Typologies](#-machine-learning-pipeline)
 - [Technology Stack](#-technology-stack)
 - [Quick Start & Installation](#-quick-start--installation)
-- [Demo Credentials](#-demo-credentials)
-- [Automated Test Suite (40/40 Passing)](#-automated-test-suite)
+- [Demonstration Access & Recruiter Portal](#-demonstration-access--recruiter-portal)
+- [Automated Test Suite (250/250 Passing)](#-automated-test-suite-250250-passing)
 - [REST API Reference & cURL Examples](#-rest-api-reference)
 - [Docker & Production Deployment](#-docker--production-deployment)
 - [Project Documentation & Academic Reports](#-project-documentation)
@@ -167,16 +167,21 @@ flowchart TD
 | **PR-AUC** | **1.000** |
 | **Inference Latency** | **$\approx 3.1$ ms** |
 
+> [!NOTE]
+> **Synthetic Dataset & Evaluation Disclaimer:**
+> The benchmark metrics above were measured on a held-out evaluation split of the 15,000-record PaySim-style synthetic simulation (`ml/generate_synthetic_data.py`). In this controlled benchmark environment, simulated fraud typologies (e.g. balance drains, extreme velocity spikes) follow mathematically discrete behavioral boundaries that the 120-tree Random Forest ensemble separates completely.
+> **These scores reflect synthetic benchmark separation and must not be interpreted as a guarantee of identical real-world performance.** In production banking rails, real financial data exhibits severe class imbalance ($< 0.1\%$), sensor noise, partial label ambiguity, and continuous adversarial strategy shifts that necessitate human-in-the-loop triage.
+
 ---
 
 ## 🛠 Technology Stack
 
-- **Backend:** Python 3.10–3.14, Flask 3.1.3, Flask-SQLAlchemy 3.1.1, Flask-Login 0.6.3, Flask-WTF 1.3.0, WTForms 3.3.2
+- **Backend:** Python 3.10–3.14, Flask 3.1.3, Flask-SQLAlchemy 3.1.1, Flask-Login 0.6.3, Flask-WTF 1.3.0, WTForms 3.3.2, Flask-Limiter 3.5.0
 - **Machine Learning:** Scikit-learn 1.8.0, Pandas 3.0.2, NumPy 2.4.4, Joblib 1.5.3, Matplotlib, Seaborn
-- **Database:** SQLite 3 (Development/Testing), PostgreSQL (Production-Ready)
+- **Database & Storage:** SQLite 3 (Development/Testing), PostgreSQL (Production with Connection Pooling), Redis (Production Distributed Rate Limiting)
 - **Frontend:** Jinja2 Templates, HTML5, CSS3, Bootstrap 5.3.3, Bootstrap Icons 1.11.3, Chart.js 4.4.2
-- **Testing:** Pytest 9.2.0, Flask Test Client
-- **Production Server:** Waitress 3.0.2, Gunicorn
+- **Testing:** Pytest 9.2.0 (250 Automated Tests across 22 Modules), Flask Test Client
+- **Production Server:** Gunicorn 21.2.0 (gthread worker, Render / Container WSGI), Waitress 3.0.2 (Cross-platform)
 
 ---
 
@@ -188,17 +193,28 @@ flowchart TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/fraudguard-ai.git
-cd fraudguard-ai
+git clone https://github.com/ajit-k-sahu/FraudGuard-AI.git
+cd FraudGuard-AI
 ```
 
 ### 2. Create and Activate a Virtual Environment
-```bash
-# Windows (PowerShell)
-python -m venv venv
-.\venv\Scripts\Activate.ps1
 
-# Linux / macOS
+**Windows (PowerShell):**
+```powershell
+python -m venv venv
+# If script execution is restricted on your system, allow it for the current process:
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\venv\Scripts\Activate.ps1
+```
+
+**Windows (Command Prompt / cmd.exe):**
+```cmd
+python -m venv venv
+venv\Scripts\activate.bat
+```
+
+**Linux / macOS:**
+```bash
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -210,7 +226,7 @@ pip install -r requirements.txt
 ```
 
 ### 4. Configure Environment Variables
-Copy the sample environment file:
+Copy the template configuration file:
 ```bash
 # Windows
 copy .env.example .env
@@ -219,17 +235,16 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-### 5. Generate ML Dataset, Train Model & Seed Demo Data
-Run the automated initialization pipeline:
+### 5. Seed Initial Data (Model Artifacts Included)
+Pre-trained model artifacts (`ml/artifacts/pipeline.joblib`, `model_metadata.json`, and `feature_importance.json`) are committed directly to the repository and ready for immediate inference. Simply run the seeding script to populate initial baseline analyst and demonstration scenarios:
 ```bash
-# Generate 15,000 synthetic transaction records
-python ml/generate_synthetic_data.py
-
-# Train and evaluate models, persisting pipeline.joblib
-python ml/train_model.py
-
-# Seed administrator, analyst accounts, and demo scenarios
 python scripts/seed_demo_data.py
+```
+
+*(Optional)* If you wish to regenerate synthetic transactions and retrain the machine learning pipeline from scratch:
+```bash
+python ml/generate_synthetic_data.py
+python ml/train_model.py
 ```
 
 ### 6. Run the Application
@@ -240,75 +255,41 @@ Open your web browser and navigate to: **`http://127.0.0.1:5000`**
 
 ---
 
-## 🔑 Demo Credentials
+## 🔑 Demonstration Access & Recruiter Portal
 
-| Role | Email Address | Password | Clearances |
-| :--- | :--- | :--- | :--- |
-| **Recruiter / Financial Analyst Demo** | `analyst@bank.com` | `AnalystPass123!` | Full Analyst Portal, Single & Batch AI Inference, Fraud Alerts, Analytics |
+FraudGuard AI provides a secure, isolated evaluation flow for recruiters and reviewers without requiring manual registration:
+
+### ⚡ One-Click Instant Recruiter Demo (Recommended)
+- Navigate to the login page (`/auth/login`) and click the **"Instant Recruiter Demo"** button (or navigate directly to `/auth/demo-login`).
+- **Unique Ephemeral Identity:** Provisions a fresh, isolated session (`recruiter_<uuid>@demo.fraudguard.ai`).
+- **Data Isolation:** Each recruiter session operates inside an isolated sandbox with dedicated transaction records, alerts, and analytics.
+- **Active 2-Hour Expiration:** Sessions expire exactly 2 hours after creation using server-side UTC timestamps (`User.is_expired`), immediately revoking access to protected routes even before physical cleanup.
+
+### 👤 Permanent Baseline Analyst Account
+- For local testing and development, a seeded baseline account is provided:
+  - **Email:** `analyst@bank.com`
+  - **Clearances:** Analyst Portal, Real-time & Batch AI Inferences, Fraud Alerts, Executive Analytics.
+  *(Password is provisioned securely during local seeding or via environment variables).*
 
 > **Note on Administrative Security:**
-> In accordance with production security standards, administrative credentials are never displayed on public pages or documentation. Production and local administrative accounts are securely provisioned via environment variables (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) using `python scripts/create_admin.py`.
+> In accordance with production security standards, administrative credentials are never displayed publicly. Production and local administrative accounts are securely initialized via environment variables (`ADMIN_EMAIL`, `ADMIN_PASSWORD`) using `python scripts/create_admin.py`.
 
 ---
 
-## 🧪 Automated Test Suite
+## 🧪 Automated Test Suite (250/250 Passing)
 
-FraudGuard AI includes an exhaustive automated test suite covering all tiers of the application:
+FraudGuard AI includes an exhaustive regression test suite covering all tiers of the application:
 
 ```bash
 pytest tests/ -v
 ```
 
-### Test Suite Execution Output (40/40 Passing):
-```text
-============================= test session starts =============================
-platform win32 -- Python 3.14.3, pytest-9.2.0, pluggy-1.7.0
-rootdir: C:\Users\Welcome\Downloads\FraudGuard- AI
-collected 40 items
+### Verified Test Coverage Across 22 Modules:
+- **Core Application & Views:** `test_alerts.py`, `test_api.py`, `test_audit_verification.py`, `test_auth.py`, `test_batch.py`, `test_file_upload_and_validation.py`, `test_frontend_views.py`, `test_transactions.py`, `test_timezone.py`, `test_ml_prediction.py`.
+- **Recruiter Demo Security & Expiration:** `test_demo_account_security.py`, `test_demo_cleanup.py`, `test_demo_expiration_and_migration.py`, `test_demo_isolation.py`, `test_one_click_demo_login.py`.
+- **Infrastructure, WSGI & Production Security:** `test_free_tier_hosting.py`, `test_gunicorn_and_proxy.py`, `test_postgres_config.py`, `test_production_secrets_hardening.py`, `test_rate_limiting.py`, `test_redis_ratelimit.py`, `test_security_headers_and_csrf.py`.
 
-tests/test_alerts.py::test_alert_generation_and_list_view PASSED         [  2%]
-tests/test_api.py::test_api_health_endpoint PASSED                       [  5%]
-tests/test_api.py::test_api_auth_login PASSED                            [  7%]
-tests/test_api.py::test_api_predict_endpoint_valid PASSED                [ 10%]
-tests/test_api.py::test_api_predict_missing_amount_error PASSED          [ 12%]
-tests/test_api.py::test_api_predict_batch_endpoint PASSED                [ 15%]
-tests/test_api.py::test_api_transactions_and_stats PASSED                [ 17%]
-tests/test_api.py::test_api_model_info_diagnostics PASSED                [ 20%]
-tests/test_audit_verification.py::test_app_initialization PASSED         [ 22%]
-tests/test_audit_verification.py::test_user_authentication_and_password_security PASSED [ 25%]
-tests/test_audit_verification.py::test_ml_service_and_artifacts PASSED   [ 27%]
-tests/test_audit_verification.py::test_prediction_engine_low_and_high_risk PASSED [ 30%]
-tests/test_audit_verification.py::test_api_health_endpoint PASSED        [ 32%]
-tests/test_audit_verification.py::test_api_predict_endpoint PASSED       [ 35%]
-tests/test_auth.py::test_registration_success PASSED                     [ 37%]
-tests/test_auth.py::test_registration_duplicate_email PASSED             [ 40%]
-tests/test_auth.py::test_registration_password_mismatch PASSED           [ 42%]
-tests/test_auth.py::test_login_success_and_logout PASSED                 [ 45%]
-tests/test_auth.py::test_login_invalid_password PASSED                   [ 47%]
-tests/test_auth.py::test_login_deactivated_account PASSED                [ 50%]
-tests/test_auth.py::test_protected_routes_require_authentication PASSED  [ 52%]
-tests/test_batch.py::test_batch_page_loads PASSED                        [ 55%]
-tests/test_batch.py::test_batch_sample_csv_download PASSED               [ 57%]
-tests/test_batch.py::test_batch_csv_upload_and_processing PASSED         [ 60%]
-tests/test_batch.py::test_batch_upload_empty_submission PASSED           [ 62%]
-tests/test_frontend_views.py::test_public_pages PASSED                   [ 65%]
-tests/test_frontend_views.py::test_login_and_logout_flow PASSED          [ 67%]
-tests/test_frontend_views.py::test_transaction_views PASSED              [ 70%]
-tests/test_frontend_views.py::test_alerts_and_analytics_views PASSED     [ 72%]
-tests/test_frontend_views.py::test_rbac_admin_security PASSED            [ 75%]
-tests/test_ml_prediction.py::test_ml_service_singleton_and_artifacts PASSED [ 77%]
-tests/test_ml_prediction.py::test_prediction_low_risk_retail_transaction PASSED [ 80%]
-tests/test_ml_prediction.py::test_prediction_high_risk_account_takeover PASSED [ 82%]
-tests/test_ml_prediction.py::test_explainability_and_recommended_actions PASSED [ 85%]
-tests/test_transactions.py::test_analyze_page_get PASSED                 [ 87%]
-tests/test_transactions.py::test_analyze_page_submission_legitimate PASSED [ 90%]
-tests/test_transactions.py::test_analyze_page_submission_high_risk PASSED [ 92%]
-tests/test_transactions.py::test_history_filtering_and_search PASSED     [ 95%]
-tests/test_transactions.py::test_transaction_detail_access_control PASSED [ 97%]
-tests/test_transactions.py::test_transaction_csv_export PASSED           [100%]
-
-====================== 40 passed in 26.44s ======================
-```
+**Test Execution Result:** **250 Passed, 0 Failed (100% Pass Rate).**
 
 ---
 
@@ -378,12 +359,12 @@ curl -X POST http://127.0.0.1:5000/api/v1/predict \
 
 ## 🐳 Docker & Production Deployment
 
-### 1. Docker Compose (Web App + PostgreSQL)
-Run the entire stack in isolated Docker containers:
+### 1. Docker Compose (Web App + PostgreSQL + Redis)
+Run the entire production-like stack in isolated Docker containers:
 ```bash
 docker-compose up -d --build
 ```
-Access the application at `http://localhost:5000`. Container health checks monitor database connectivity and ML pipeline memory residency.
+Access the application at `http://localhost:5000`. Container health checks monitor database connectivity, Redis shared rate limiting, and ML pipeline memory residency.
 
 ### 2. Standalone Docker Container
 ```bash
@@ -391,11 +372,20 @@ docker build -t fraudguard-ai:latest .
 docker run -p 5000:5000 --env-file .env fraudguard-ai:latest
 ```
 
-### 3. Deploy to Render / Cloud PaaS
-The repository includes a ready-to-use [`render.yaml`](render.yaml) specification and [`Procfile`](Procfile) for zero-configuration cloud deployment:
-1. Connect your GitHub repository to [Render.com](https://render.com/).
-2. Select **Blueprint** deployment.
-3. Render automatically provisions the Python environment, executes `requirements.txt`, trains the pipeline, seeds demo accounts, and attaches health monitoring.
+### 3. Deploy to Render (Free-Tier Stack)
+The repository includes a ready-to-use [`render.yaml`](render.yaml) blueprint configured for free-tier hosting:
+- **Web Service:** Render Free Web Service (512MB RAM, Gunicorn WSGI with `WEB_CONCURRENCY=2` and `GUNICORN_THREADS=2`).
+- **Database:** External free PostgreSQL (such as [Neon.tech](https://neon.tech/)).
+- **Rate Limiting / Cache:** External free Redis (such as [Upstash.com](https://upstash.com/)).
+
+**Deployment Steps:**
+1. In [Render Dashboard](https://dashboard.render.com/), select **New +** > **Blueprint**.
+2. Connect your `FraudGuard-AI` repository.
+3. When prompted for environment variables marked `sync: false`, provide:
+   - `DATABASE_URL`: Your Neon PostgreSQL connection string (with `?sslmode=require`).
+   - `REDIS_URL`: Your Upstash Redis TLS connection string (`rediss://...`).
+   - `ADMIN_PASSWORD`: A secure password ($\ge 12$ characters) to initialize the administrator account.
+4. Render automatically generates a cryptographically secure `SECRET_KEY`, installs `requirements.txt`, seeds baseline demo scenarios (reusing pre-trained model artifacts without retraining), and attaches health monitoring (`/api/health`).
 
 ---
 
